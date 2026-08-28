@@ -103,12 +103,14 @@ app.include_router(field_reports_router)
 
 
 
-# Healthcheck Endpoint for Container Monitoring & Load Balancers
+# Healthcheck Endpoints for Cloud Services (Render, Docker, Kubernetes)
 @app.get("/api/health")
+@app.get("/health")
+@app.get("/healthz")
 async def health_check():
     """
     Returns application health status, database connectivity, and uptime.
-    Used by Docker healthchecks, Kubernetes probes, and Uptime monitors.
+    Used by Render, Docker healthchecks, Kubernetes probes, and Uptime monitors.
     """
     uptime_seconds = int(time.time() - _START_TIME)
     
