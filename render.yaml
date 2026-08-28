@@ -1,21 +1,17 @@
 # ==============================================================================
 # Render Blueprint Specification for Vertex Construction & PCCC Quote System
-# Repository: cuocvitm90/vertex-quote-system
+# Free Tier Ready - One-Click Cloud Deployment
 # ==============================================================================
 services:
   - type: web
     name: vertex-quote-system
     runtime: python
-    region: singapore # Chọn region Singapore để tốc độ truy cập từ VN nhanh nhất
-    plan: starter # Hoặc free
+    region: singapore # Tốc độ truy cập tối ưu cho Việt Nam
+    plan: free # Sử dụng gói Free miễn phí 100% của Render
     buildCommand: "pip install -r requirements.txt"
     startCommand: "python run.py --host 0.0.0.0 --port $PORT"
     healthCheckPath: /api/health
     autoDeploy: true
-    disk:
-      name: vertex-storage
-      mountPath: /app/storage
-      sizeGB: 1
     envVars:
       - key: APP_ENV
         value: production
@@ -30,6 +26,6 @@ services:
       - key: AI_MODEL_NAME
         value: llama-3.3-70b-versatile
       - key: AI_API_KEY
-        sync: false # Để trống giá trị - nhập trên giao diện Render Dashboard khi deploy
+        sync: false # Nhập API Key trên Render Dashboard hoặc để trống dùng rule-based fallback
       - key: WEB_CONCURRENCY
         value: "2"
