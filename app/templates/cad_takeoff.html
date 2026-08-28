@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bóc Tách CAD & Revit BIM - Vertex Construction & PCCC</title>
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <style>
+        /* Specific Add-on Styling for CAD/Revit Takeoff */
+        .takeoff-grid {
+            display: grid;
+            grid-template-columns: 420px 1fr;
+            gap: 20px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 1100px) {
+            .takeoff-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .layer-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 10px;
+            background: #F1F5F9;
+            border: 1px solid #E2E8F0;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--vertex-navy-main);
+            margin: 3px;
+        }
+
+        .layer-count {
+            background: var(--vertex-navy-main);
+            color: #FFFFFF;
+            font-size: 9.5px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 999px;
+        }
+
+        .metric-cards-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        @media (max-width: 768px) {
+            .metric-cards-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        .cad-metric-card {
+            background: #FFFFFF;
+            border: 1px solid var(--border-card);
+            border-radius: var(--radius-md);
+            padding: 12px 14px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cad-metric-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 4px;
+            height: 100%;
+            background: var(--vertex-orange-main);
+        }
+
+        .cad-metric-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            background: rgba(255, 107, 53, 0.1);
+            color: var(--vertex-orange-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+
+        .cad-metric-info {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .cad-metric-title {
+            font-size: 11px;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+        }
+
+        .cad-metric-val {
+            font-size: 18px;
+            font-weight: 800;
+            color: var(--vertex-navy-main);
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .table-toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+            flex-wrap: wrap;
+        }
+
+        .search-box-sm {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #FFFFFF;
+            border: 1px solid var(--border-card);
+            padding: 6px 12px;
+            border-radius: var(--radius-sm);
+            font-size: 12.5px;
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .search-box-sm input {
+            border: none;
+            outline: none;
+            width: 100%;
+            font-family: inherit;
+            font-size: 12.5px;
+        }
+
+        .btn-filter-pill {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 11.5px;
+            font-weight: 600;
+            border: 1px solid var(--border-card);
+            background: #FFFFFF;
+            color: #475569;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+
+        .btn-filter-pill.active,
+        .btn-filter-pill:hover {
+            background: var(--vertex-navy-main);
+            color: #FFFFFF;
+            border-color: var(--vertex-navy-main);
+        }
+
+        .qty-editable-input {
+            width: 80px;
+            padding: 4px 6px;
+            border: 1px solid #CBD5E1;
+            border-radius: 4px;
+            text-align: right;
+            font-weight: 700;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            color: var(--vertex-navy-main);
+        }
+
+        .qty-editable-input:focus {
+            border-color: var(--vertex-orange-main);
+            outline: none;
+            box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.2);
+        }
+
+        .action-float-bar {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #E2E8F0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/" class="brand-block" title="Vertex Construction & PCCC Automation Engine">
+                <img src="/static/images/logo-white.svg" alt="VERTEX CONSTRUCTION & PCCC" class="brand-logo-img" onerror="this.src='/static/images/logo-white.png'">
+            </a>
+            
+            <div class="header-stats">
+                <div class="stat-badge">
+                    <span class="stat-label">Chế Độ:</span>
+                    <span class="stat-value" style="color:var(--vertex-orange-main);">CAD/BIM</span>
+                </div>
+                <div class="stat-badge badge-success">
+                    <span class="stat-label">Engine:</span>
+                    <span class="stat-value">ezDXF + AI</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Multi-language Select Dropdown -->
+                <div class="lang-selector-wrapper" title="Chọn ngôn ngữ hiển thị">
+                    <select id="language-switcher" class="lang-select" onchange="setLanguage(this.value)">
+                        <option value="vi">🇻🇳 Tiếng Việt</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="zh">🇨🇳 简体中文</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                    </select>
+                </div>
+
+                <!-- User Guide Button -->
+                <button type="button" class="btn btn-outline" onclick="openUserGuideModal()" title="Hướng dẫn sử dụng quy trình báo giá Vertex">
+                    <i class="fa-solid fa-book-open"></i> <span>Hướng Dẫn</span>
+                </button>
+
+                <!-- Back to Main Dashboard Button -->
+                <a href="/" class="btn btn-primary" title="Quay lại Bảng Điều Khiển Báo Giá Chính">
+                    <i class="fa-solid fa-arrow-left"></i> <span>Quay Lại Báo Giá</span>
+                </a>
+
+                <!-- User Profile & RBAC Role Chip -->
+                <div class="user-profile-chip" title="Tài khoản đang đăng nhập">
+                    <div class="user-avatar">
+                        {{ user.full_name[0] if user and user.full_name else 'V' }}
+                    </div>
+                    <div class="user-meta">
+                        <span class="user-name">{{ user.full_name if user else 'Người dùng' }}</span>
+                        <span class="user-role-tag">
+                            <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
+                        </span>
+                    </div>
+                    <a href="/logout" class="btn-logout" title="Đăng xuất tài khoản">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- 3-Scenario Navigation Tabs -->
+        <div class="scenario-tabs-nav">
+            <a href="/cad-takeoff" class="scenario-tab-btn active" style="text-decoration:none;">
+                <div class="tab-icon"><i class="fa-solid fa-compass-drafting"></i></div>
+                <div class="tab-text">
+                    <span class="tab-title">1. Bốc Tách CAD/BIM</span>
+                    <span class="tab-subtitle">Bản vẽ .dwg, .dxf -> Phân loại Sprinkler, Vách Tường, Báo Cháy, Ống Gió</span>
+                </div>
+                <span class="tab-badge">Tự Động AI</span>
+            </a>
+            <a href="/?tab=specified" class="scenario-tab-btn" style="text-decoration:none;">
+                <div class="tab-icon"><i class="fa-solid fa-file-contract"></i></div>
+                <div class="tab-text">
+                    <span class="tab-title">2. Nhập BOQ & Chỉ Định Hãng</span>
+                    <span class="tab-subtitle">Hồ sơ CĐT chỉ định Ebara, Viking, Hochiki, Paragon, Hòa Phát...</span>
+                </div>
+                <span class="tab-badge">Đọc Tech Spec</span>
+            </a>
+            <a href="/?tab=catalog" class="scenario-tab-btn" style="text-decoration:none;">
+                <div class="tab-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="tab-text">
+                    <span class="tab-title">3. Nhập BOQ Thuần & Đề Xuất</span>
+                    <span class="tab-subtitle">Tự động so khớp Vertex Catalog & Đề xuất Hãng tối ưu chào thầu</span>
+                </div>
+                <span class="tab-badge">Vertex Standard</span>
+            </a>
+        </div>
+
+        <!-- Banner Intro -->
+        <section class="workflow-banner">
+            <div class="banner-title">
+                <h2><i class="fa-solid fa-layer-group" style="color:var(--vertex-orange-main);"></i> Module Bóc Tách Bản Vẽ CAD (.DXF, .DWG) & Mô Hình BIM Revit</h2>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <span class="chip-tag"><i class="fa-solid fa-microchip"></i> Tự Động Phân Tích Layer & Entity CAD</span>
+                    <span class="chip-tag"><i class="fa-solid fa-calculator"></i> Tính Diện Tích Ống Gió & Chiều Dài Ống</span>
+                    <span class="chip-tag" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color:#059669;"><i class="fa-solid fa-file-excel"></i> Xuất BOQ Chuẩn Sẵn Sàng Báo Giá</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2-Column Takeoff Workspace -->
+        <div class="takeoff-grid">
+            <!-- Left Column: Upload & Configuration -->
+            <div class="takeoff-left-col">
+                <div class="panel-card">
+                    <div class="panel-header">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-file-arrow-up" style="color:var(--vertex-orange-main);"></i>
+                            <h3>Tải Lên Bản Vẽ CAD / Mô Hình BIM</h3>
+                        </div>
+                    </div>
+                    <div class="panel-body">
+                        <!-- Dropzone -->
+                        <div id="cad-dropzone" class="dropzone" style="padding: 24px 16px; border: 2px dashed #CBD5E1; border-radius: var(--radius-md); text-align: center; cursor: pointer; background: #F8FAFC; transition: all 0.2s ease;">
+                            <div style="width:48px; height:48px; border-radius:50%; background:rgba(255,107,53,0.1); color:var(--vertex-orange-main); display:flex; align-items:center; justify-content:center; font-size:20px; margin:0 auto 10px;">
+                                <i class="fa-solid fa-compass-drafting"></i>
+                            </div>
+                            <h4 style="font-size:13.5px; font-weight:700; color:var(--vertex-navy-main); margin-bottom:4px;">Kéo thả file bản vẽ vào đây</h4>
+                            <p style="font-size:11.5px; color:#64748B; margin-bottom:10px;">hoặc <span style="color:var(--vertex-orange-main); font-weight:700; text-decoration:underline;">chọn file từ máy tính</span></p>
+                            <span style="font-size:10.5px; color:#94A3B8; display:block;">Hỗ trợ: CAD (.dxf, .dwg), Revit (.rvt, .ifc), Excel / CSV</span>
+                            <input type="file" id="cad-file-input" style="display:none;" accept=".dxf,.dwg,.rvt,.ifc,.xlsx,.xls,.csv">
+                        </div>
+
+                        <!-- Scale & Precision Settings -->
+                        <div style="margin-top:14px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:11px; font-weight:700; color:#475569; margin-bottom:3px; display:block;">Tỷ Lệ Bản Vẽ CAD</label>
+                                <select id="cad-scale-select" class="form-control" style="font-size:12px; padding:6px 10px; height:34px;">
+                                    <option value="1:100" selected>1:100 (Mặt bằng tiêu chuẩn)</option>
+                                    <option value="1:50">1:50 (Chi tiết cụm van / bơm)</option>
+                                    <option value="1:200">1:200 (Mặt bằng tổng thể)</option>
+                                    <option value="1:1">1:1 (Kích thước thực mm)</option>
+                                </select>
+                            </div>
+                            <div class="form-group" style="margin:0;">
+                                <label style="font-size:11px; font-weight:700; color:#475569; margin-bottom:3px; display:block;">Hệ Số Bù Nối Ống / Hao Hụt</label>
+                                <select id="cad-waste-select" class="form-control" style="font-size:12px; padding:6px 10px; height:34px;">
+                                    <option value="1.05" selected>+5% (Tiêu chuẩn công trình)</option>
+                                    <option value="1.08">+8% (Nhiều cua góc, co tê)</option>
+                                    <option value="1.00">+0% (Bóc theo thiết kế gốc)</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Sample Preload Buttons -->
+                        <div style="margin-top:16px; padding-top:14px; border-top:1px solid #E2E8F0;">
+                            <label style="font-size:11px; font-weight:700; color:#475569; margin-bottom:8px; display:block;">
+                                <i class="fa-solid fa-bolt" style="color:var(--vertex-orange-main);"></i> Dùng Thử Nhanh Bản Vẽ Mẫu Vertex:
+                            </label>
+                            <div style="display:flex; flex-direction:column; gap:6px;">
+                                <button type="button" class="btn btn-outline-dark" style="font-size:11.5px; padding:6px 10px; justify-content:flex-start; width:100%; border-color:#CBD5E1;" onclick="loadSampleTakeoff('cad_pccc')">
+                                    <i class="fa-solid fa-fire-extinguisher" style="color:#EF4444; width:16px;"></i> <span>1. Bản Vẽ Cấp Nước PCCC &amp; Sprinkler (.dxf)</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-dark" style="font-size:11.5px; padding:6px 10px; justify-content:flex-start; width:100%; border-color:#CBD5E1;" onclick="loadSampleTakeoff('cad_hvac')">
+                                    <i class="fa-solid fa-wind" style="color:#0284C7; width:16px;"></i> <span>2. Bản Vẽ Thông Gió &amp; Hút Khói Sự Cố (.dxf)</span>
+                                </button>
+                                <button type="button" class="btn btn-outline-dark" style="font-size:11.5px; padding:6px 10px; justify-content:flex-start; width:100%; border-color:#CBD5E1;" onclick="loadSampleTakeoff('revit_mep')">
+                                    <i class="fa-solid fa-cube" style="color:#10B981; width:16px;"></i> <span>3. Mô Hình BIM Revit MEP 3D (.rvt LOD 350)</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Extracted Layers Box -->
+                        <div id="layers-summary-box" style="margin-top:16px; padding-top:14px; border-top:1px solid #E2E8F0;">
+                            <label style="font-size:11px; font-weight:700; color:#475569; margin-bottom:6px; display:block;">
+                                <i class="fa-solid fa-layer-group" style="color:var(--vertex-navy-main);"></i> Các Layer / Category Phát Hiện:
+                            </label>
+                            <div id="layers-badge-container" style="display:flex; flex-wrap:wrap; max-height:120px; overflow-y:auto; padding:2px 0;">
+                                <span class="layer-badge">PCCC_SPRINKLER <span class="layer-count">168</span></span>
+                                <span class="layer-badge">PCCC_PIPE_MAIN <span class="layer-count">426m</span></span>
+                                <span class="layer-badge">PCCC_VALVES <span class="layer-count">14</span></span>
+                                <span class="layer-badge">EL_FIRE_ALARM <span class="layer-count">82</span></span>
+                            </div>
+                        </div>
+
+                        <!-- Engineering Cross-Checks Panel -->
+                        <div id="cross-checks-box" style="margin-top:16px; padding-top:14px; border-top:1px solid #E2E8F0;">
+                            <label style="font-size:11px; font-weight:700; color:#475569; margin-bottom:8px; display:flex; align-items:center; justify-content:space-between;">
+                                <span><i class="fa-solid fa-shield-halved" style="color:var(--vertex-orange-main);"></i> Kiểm Tra Chéo Định Mức (Cross-Checks):</span>
+                                <span id="cross-check-badge" style="background:#10B981; color:#fff; font-size:9.5px; padding:1px 6px; border-radius:999px; font-weight:700;">100% Khớp</span>
+                            </label>
+                            <div id="cross-checks-container" style="display:flex; flex-direction:column; gap:6px; max-height:190px; overflow-y:auto;">
+                                <!-- Rendered dynamically by JS -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column: Results & Interactive BOQ Table -->
+            <div class="takeoff-right-col">
+                <!-- 4 Metrics Row -->
+                <div class="metric-cards-row">
+                    <div class="cad-metric-card">
+                        <div class="cad-metric-icon"><i class="fa-solid fa-fire-extinguisher"></i></div>
+                        <div class="cad-metric-info">
+                            <span class="cad-metric-title">Thiết Bị PCCC</span>
+                            <span class="cad-metric-val" id="metric-devices">168</span>
+                        </div>
+                    </div>
+                    <div class="cad-metric-card">
+                        <div class="cad-metric-icon"><i class="fa-solid fa-pipe"></i></div>
+                        <div class="cad-metric-info">
+                            <span class="cad-metric-title">Chiều Dài Ống (m)</span>
+                            <span class="cad-metric-val" id="metric-pipes">1,175</span>
+                        </div>
+                    </div>
+                    <div class="cad-metric-card">
+                        <div class="cad-metric-icon"><i class="fa-solid fa-wind"></i></div>
+                        <div class="cad-metric-info">
+                            <span class="cad-metric-title">Ống Gió (m²)</span>
+                            <span class="cad-metric-val" id="metric-ducts">537.5</span>
+                        </div>
+                    </div>
+                    <div class="cad-metric-card">
+                        <div class="cad-metric-icon"><i class="fa-solid fa-list-check"></i></div>
+                        <div class="cad-metric-info">
+                            <span class="cad-metric-title">Tổng Mục BOQ</span>
+                            <span class="cad-metric-val" id="metric-items">12</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Cross-Check & Accessory Norm Calculation Panel -->
+                <div class="cross-check-panel" id="accessory-calc-panel">
+                    <div class="cross-check-header">
+                        <div class="cross-check-title">
+                            <i class="fa-solid fa-calculator" style="color:var(--vertex-orange-main);"></i>
+                            <span>Quy Đổi Định Mức Phụ Kiện, Quang Treo &amp; Khớp Nối (TCVN 3890 / MEP Standard)</span>
+                        </div>
+                        <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:4px 10px; border-color:#FF6B35; color:#FF6B35; background:#FFF7ED; font-weight:700; cursor:pointer;" onclick="autoAddAccessories()">
+                            <i class="fa-solid fa-plus-circle"></i> <span>Tự Động Bổ Sung Định Mức Vào Bảng</span>
+                        </button>
+                    </div>
+                    <div class="cross-check-grid">
+                        <div class="cross-check-item">
+                            <div class="cross-check-icon"><i class="fa-solid fa-link"></i></div>
+                            <div class="cross-check-text">
+                                <h5>Quang Treo &amp; Giá Đỡ Ống PCCC</h5>
+                                <p>Định mức: 1 bộ / 2.5m ống &rarr; <b id="norm-hangers-val" style="color:#2563EB;">470 bộ</b></p>
+                            </div>
+                        </div>
+                        <div class="cross-check-item">
+                            <div class="cross-check-icon" style="background:rgba(16,185,129,0.1); color:#059669;"><i class="fa-solid fa-screwdriver-wrench"></i></div>
+                            <div class="cross-check-text">
+                                <h5>Phụ Kiện Nối Ống PCCC (Co, Tê, Khớp)</h5>
+                                <p>Định mức: 18% mét ống &rarr; <b id="norm-fittings-val" style="color:#059669;">212 bộ</b></p>
+                            </div>
+                        </div>
+                        <div class="cross-check-item">
+                            <div class="cross-check-icon" style="background:rgba(245,158,11,0.1); color:#D97706;"><i class="fa-solid fa-wind"></i></div>
+                            <div class="cross-check-text">
+                                <h5>Quang Treo &amp; Cùm V Ống Gió</h5>
+                                <p>Định mức: 1 bộ / 1.5m² &rarr; <b id="norm-duct-hangers-val" style="color:#D97706;">358 bộ</b></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Main BOQ Table Panel -->
+                <div class="panel-card">
+                    <div class="panel-header" style="flex-wrap:wrap; gap:10px;">
+                        <div class="panel-title">
+                            <i class="fa-solid fa-table-list" style="color:var(--vertex-orange-main);"></i>
+                            <h3 id="takeoff-table-title">Bảng Tổng Hợp Khối Lượng Bóc Tách (Ready-to-use BOQ)</h3>
+                        </div>
+                        <div style="font-size:11.5px; color:#64748B; font-weight:600;" id="takeoff-meta-desc">
+                            File nguồn: PCCC_Floor_B1_B2_Sprinkler.dxf (Tỷ lệ 1:100)
+                        </div>
+                    </div>
+
+                    <div class="panel-body">
+                        <!-- Toolbar -->
+                        <div class="table-toolbar">
+                            <div class="search-box-sm">
+                                <i class="fa-solid fa-magnifying-glass" style="color:#94A3B8;"></i>
+                                <input type="text" id="takeoff-search" placeholder="Lọc nhanh thiết bị, quy cách, layer..." onkeyup="filterTakeoffTable()">
+                            </div>
+                            <div style="display:flex; gap:4px; flex-wrap:wrap;">
+                                <button class="btn-filter-pill active" onclick="setCategoryFilter('all', this)">Tất Cả</button>
+                                <button class="btn-filter-pill" onclick="setCategoryFilter('PCCC', this)">PCCC</button>
+                                <button class="btn-filter-pill" onclick="setCategoryFilter('HVAC', this)">HVAC</button>
+                                <button class="btn-filter-pill" onclick="setCategoryFilter('Piping', this)">Đường Ống</button>
+                                <button class="btn-filter-pill" onclick="setCategoryFilter('Báo cháy', this)">Báo Cháy</button>
+                            </div>
+                        </div>
+
+                        <!-- Data Table -->
+                        <div style="overflow-x:auto; border:1px solid #E2E8F0; border-radius:var(--radius-sm);">
+                            <table class="data-table" style="width:100%; border-collapse:collapse; font-size:12px;">
+                                <thead>
+                                    <tr style="background:var(--vertex-navy-main); color:#FFFFFF;">
+                                        <th style="padding:8px; text-align:center; width:40px;">STT</th>
+                                        <th style="padding:8px; text-align:left; width:110px;">Phân Loại / Layer</th>
+                                        <th style="padding:8px; text-align:left;">Tên Thiết Bị / Vật Tư</th>
+                                        <th style="padding:8px; text-align:left;">Quy Cách Kỹ Thuật</th>
+                                        <th style="padding:8px; text-align:center; width:60px;">ĐVT</th>
+                                        <th style="padding:8px; text-align:center; width:95px;">Hao Hụt (%)</th>
+                                        <th style="padding:8px; text-align:right; width:95px;">Khối Lượng</th>
+                                        <th style="padding:8px; text-align:center; width:50px;">Xóa</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="takeoff-tbody">
+                                    <!-- Dynamic rows rendered by JS -->
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <!-- Action Float Bar -->
+                        <div class="action-float-bar" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-top:14px; padding-top:12px; border-top:1px solid #E2E8F0;">
+                            <div style="font-size:12px; color:#475569;">
+                                <i class="fa-solid fa-circle-info" style="color:#0284C7;"></i> Áp đơn giá nhân công cố định: <b>220k/m ống, 350k thiết bị, 370k đèn exit, 100k-155k/m² ống gió</b>.
+                            </div>
+                            <div style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                                <button type="button" class="btn btn-outline-dark" onclick="exportTakeoffExcel()">
+                                    <i class="fa-solid fa-file-excel" style="color:#10B981;"></i> <span>Xuất File Excel BOQ</span>
+                                </button>
+                                <button type="button" class="btn-cta-pricing" onclick="applyPricingAndLaborDirectly()">
+                                    <i class="fa-solid fa-bolt"></i> <span>Chuyển Sang Báo Giá &amp; Áp Định Mức Nhân Công</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Floating Author & Support Footer (Bottom Right) -->
+    <div class="author-floating-footer" title="Thông tin phát triển &amp; hỗ trợ kỹ thuật">
+        <i class="fa-solid fa-headset" style="color:var(--vertex-orange-main); font-size:12.5px;"></i>
+        <span class="footer-author-text">Phát triển bởi: <b>Nguyễn Quốc Việt</b></span>
+        <span class="footer-sep">|</span>
+        <a href="tel:0364399202" class="footer-hotline-btn">
+            <i class="fa-solid fa-phone" style="font-size:10px;"></i> Hotline: <b>0364399202</b>
+        </a>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script src="/static/js/i18n.js"></script>
+    <script>
+        // Global State for CAD/Revit Takeoff
+        let currentTakeoffData = null;
+        let activeCategoryFilter = 'all';
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initDropzone();
+            // Load default sample dataset
+            loadSampleTakeoff('cad_pccc');
+        });
+
+        function initDropzone() {
+            const dropzone = document.getElementById('cad-dropzone');
+            const fileInput = document.getElementById('cad-file-input');
+
+            if (!dropzone || !fileInput) return;
+
+            dropzone.addEventListener('click', () => fileInput.click());
+            dropzone.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = 'var(--vertex-orange-main)';
+                dropzone.style.background = 'rgba(255,107,53,0.05)';
+            });
+            dropzone.addEventListener('dragleave', () => {
+                dropzone.style.borderColor = '#CBD5E1';
+                dropzone.style.background = '#F8FAFC';
+            });
+            dropzone.addEventListener('drop', (e) => {
+                e.preventDefault();
+                dropzone.style.borderColor = '#CBD5E1';
+                dropzone.style.background = '#F8FAFC';
+                if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                    handleFileUpload(e.dataTransfer.files[0]);
+                }
+            });
+
+            fileInput.addEventListener('change', () => {
+                if (fileInput.files && fileInput.files.length > 0) {
+                    handleFileUpload(fileInput.files[0]);
+                }
+            });
+        }
+
+        async function handleFileUpload(file) {
+            showToast(`Đang phân tích bản vẽ: ${file.name}...`);
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('scale', document.getElementById('cad-scale-select').value);
+
+            try {
+                const resp = await fetch('/api/cad-takeoff/process', {
+                    method: 'POST',
+                    body: formData
+                });
+                const res = await resp.json();
+                if (!resp.ok) throw new Error(res.detail || 'Lỗi xử lý file');
+
+                currentTakeoffData = res.data;
+                renderTakeoffUI(currentTakeoffData);
+                showToast(`Bóc tách thành công: ${res.data.items.length} hạng mục!`);
+            } catch (err) {
+                showToast(`Lỗi: ${err.message}`);
+            }
+        }
+
+        async function loadSampleTakeoff(sampleType) {
+            try {
+                const resp = await fetch(`/api/cad-takeoff/sample/${sampleType}`);
+                const res = await resp.json();
+                if (!resp.ok) throw new Error(res.detail || 'Lỗi tải mẫu');
+
+                currentTakeoffData = res.data;
+                renderTakeoffUI(currentTakeoffData);
+                showToast(`Đã nạp: ${res.data.title}`);
+            } catch (err) {
+                showToast(`Lỗi: ${err.message}`);
+            }
+        }
+
+        function renderTakeoffUI(data) {
+            if (!data) return;
+
+            document.getElementById('takeoff-table-title').textContent = data.title;
+            document.getElementById('takeoff-meta-desc').textContent = `File nguồn: ${data.file_name} | Dự án: ${data.project_name} | Tỷ lệ: ${data.cad_scale}`;
+
+            // Render Layers
+            const layerBox = document.getElementById('layers-badge-container');
+            if (layerBox && data.layers) {
+                layerBox.innerHTML = data.layers.map(l => `
+                    <span class="layer-badge" title="${l.desc}">${l.name} <span class="layer-count">${l.count}</span></span>
+                `).join('');
+            }
+
+            // Render Cross-Checks
+            const ccBox = document.getElementById('cross-checks-container');
+            const ccBadge = document.getElementById('cross-check-badge');
+            if (ccBox && data.cross_checks) {
+                const hasWarnings = data.cross_checks.some(c => c.status === 'WARNING');
+                if (ccBadge) {
+                    ccBadge.textContent = hasWarnings ? 'Có Cảnh Báo' : '100% Khớp';
+                    ccBadge.style.background = hasWarnings ? '#F59E0B' : '#10B981';
+                }
+                ccBox.innerHTML = data.cross_checks.map(c => {
+                    const iconColor = c.status === 'PASS' ? '#10B981' : (c.status === 'WARNING' ? '#F59E0B' : '#0284C7');
+                    const icon = c.status === 'PASS' ? 'fa-circle-check' : (c.status === 'WARNING' ? 'fa-triangle-exclamation' : 'fa-circle-info');
+                    return `
+                        <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-left:3px solid ${iconColor}; border-radius:4px; padding:6px 8px; font-size:11px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2px;">
+                                <span style="font-weight:700; color:var(--vertex-navy-main);"><i class="fa-solid ${icon}" style="color:${iconColor}; margin-right:4px;"></i>${c.title}</span>
+                                <span style="font-size:9.5px; font-weight:700; color:${iconColor};">${c.current_value}</span>
+                            </div>
+                            <div style="font-size:10px; color:#64748B; line-height:1.3;">${c.recommendation}</div>
+                        </div>
+                    `;
+                }).join('');
+            }
+
+            // Calculate Metrics
+            let totalDevices = 0;
+            let totalPipes = 0;
+            let totalDucts = 0;
+
+            if (data.summary_metrics) {
+                totalDevices = data.summary_metrics.pccc_devices_count || 0;
+                totalPipes = data.summary_metrics.pipe_total_meters || 0;
+                totalDucts = data.summary_metrics.duct_total_m2 || 0;
+            } else {
+                data.items.forEach(item => {
+                    const cat = (item.category || '').toLowerCase();
+                    const unit = (item.unit || '').toLowerCase();
+                    const qty = parseFloat(item.quantity) || 0;
+
+                    if (cat.includes('pccc') || cat.includes('báo cháy') || unit.includes('bộ') || unit.includes('cái') || unit.includes('bình')) {
+                        totalDevices += qty;
+                    }
+                    if (cat.includes('pipe') || unit === 'm') {
+                        totalPipes += qty;
+                    }
+                    if (cat.includes('hvac') || unit === 'm2') {
+                        totalDucts += qty;
+                    }
+                });
+            }
+
+            document.getElementById('metric-devices').textContent = Math.round(totalDevices).toLocaleString();
+            document.getElementById('metric-pipes').textContent = Math.round(totalPipes).toLocaleString();
+            document.getElementById('metric-ducts').textContent = totalDucts.toLocaleString(undefined, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+            document.getElementById('metric-items').textContent = data.items.length;
+
+            // Update Norm Accessory Values
+            const pipeHangerNorm = Math.max(4, Math.round(totalPipes / 2.5));
+            const pipeFittingNorm = Math.max(6, Math.round(totalPipes * 0.18));
+            const ductHangerNorm = Math.max(4, Math.round(totalDucts / 1.5));
+            
+            const normHangersEl = document.getElementById('norm-hangers-val');
+            if (normHangersEl) normHangersEl.textContent = pipeHangerNorm.toLocaleString() + ' bộ';
+            const normFittingsEl = document.getElementById('norm-fittings-val');
+            if (normFittingsEl) normFittingsEl.textContent = pipeFittingNorm.toLocaleString() + ' bộ';
+            const normDuctEl = document.getElementById('norm-duct-hangers-val');
+            if (normDuctEl) normDuctEl.textContent = ductHangerNorm.toLocaleString() + ' bộ';
+
+            renderTableRows();
+        }
+
+        function renderTableRows() {
+            const tbody = document.getElementById('takeoff-tbody');
+            if (!tbody || !currentTakeoffData) return;
+
+            const searchKey = (document.getElementById('takeoff-search').value || '').toLowerCase().trim();
+
+            const filteredItems = currentTakeoffData.items.filter(item => {
+                const matchesCat = (activeCategoryFilter === 'all') || (item.category && item.category.toLowerCase().includes(activeCategoryFilter.toLowerCase()));
+                const matchesSearch = !searchKey || 
+                    item.name.toLowerCase().includes(searchKey) || 
+                    (item.spec && item.spec.toLowerCase().includes(searchKey)) ||
+                    (item.layer && item.layer.toLowerCase().includes(searchKey));
+                return matchesCat && matchesSearch;
+            });
+
+            if (filteredItems.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="8" style="text-align:center; padding:24px; color:#94A3B8;">Không tìm thấy hạng mục phù hợp với bộ lọc.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filteredItems.map((item, idx) => `
+                <tr style="border-bottom:1px solid #E2E8F0;">
+                    <td style="padding:8px; text-align:center; font-weight:700; color:#64748B;">${idx + 1}</td>
+                    <td style="padding:8px;">
+                        <span style="font-size:10px; background:#EEF2F6; padding:2px 6px; border-radius:4px; font-family:'JetBrains Mono', monospace; font-weight:600; color:var(--vertex-navy-main);">${item.category || item.layer || 'CAD'}</span>
+                    </td>
+                    <td style="padding:8px; font-weight:700; color:var(--vertex-navy-main);">${item.name}</td>
+                    <td style="padding:8px; color:#475569;">${item.spec || '-'}</td>
+                    <td style="padding:8px; text-align:center; font-weight:600; color:#64748B;">${item.unit}</td>
+                    <td style="padding:8px; text-align:center;">
+                        <select class="quick-waste-select" onchange="adjustItemWaste(${item.stt}, this.value)" title="Điều chỉnh nhanh hao hụt">
+                            <option value="0%" ${item.waste_applied === '0%' ? 'selected' : ''}>0%</option>
+                            <option value="3%" ${item.waste_applied === '3%' ? 'selected' : ''}>+3%</option>
+                            <option value="5%" ${item.waste_applied === '5%' ? 'selected' : ''}>+5%</option>
+                            <option value="8%" ${item.waste_applied === '8%' ? 'selected' : ''}>+8%</option>
+                            <option value="10%" ${item.waste_applied === '10%' ? 'selected' : ''}>+10%</option>
+                        </select>
+                    </td>
+                    <td style="padding:8px; text-align:right;">
+                        <input type="number" step="0.1" class="qty-editable-input" value="${item.quantity}" onchange="updateItemQty(${item.stt}, this.value)">
+                    </td>
+                    <td style="padding:8px; text-align:center;">
+                        <button type="button" style="background:transparent; border:none; color:#EF4444; cursor:pointer; font-size:13px;" onclick="deleteTakeoffRow(${item.stt})" title="Xóa dòng">
+                            <i class="fa-solid fa-trash-can"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function adjustItemWaste(stt, wasteStr) {
+            if (!currentTakeoffData) return;
+            const item = currentTakeoffData.items.find(i => i.stt === stt);
+            if (item) {
+                if (!item.base_qty) item.base_qty = item.quantity;
+                const wastePercent = parseFloat(wasteStr.replace('%', '')) / 100.0;
+                item.waste_applied = wasteStr;
+                item.quantity = Math.round((item.base_qty * (1 + wastePercent)) * 10) / 10;
+                renderTakeoffUI(currentTakeoffData);
+                showToast(`Đã điều chỉnh hao hụt ${wasteStr} cho: ${item.name}`);
+            }
+        }
+
+        async function autoAddAccessories() {
+            if (!currentTakeoffData || !currentTakeoffData.items || currentTakeoffData.items.length === 0) {
+                showToast("Vui lòng tải bản vẽ hoặc nạp mẫu bóc tách trước.");
+                return;
+            }
+            showToast("Đang tự động quy đổi định mức phụ kiện & quang treo...");
+            try {
+                const resp = await fetch('/api/cad-takeoff/auto-add-accessories', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentTakeoffData)
+                });
+                const res = await resp.json();
+                if (!resp.ok) throw new Error(res.detail || "Lỗi tính toán định mức");
+
+                currentTakeoffData.items = res.items;
+                renderTakeoffUI(currentTakeoffData);
+                showToast(res.message || "Đã bổ sung phụ kiện định mức thành công!");
+            } catch (err) {
+                showToast(`Lỗi: ${err.message}`);
+            }
+        }
+
+        async function applyPricingAndLaborDirectly() {
+            if (!currentTakeoffData || !currentTakeoffData.items || currentTakeoffData.items.length === 0) {
+                showToast("Danh mục bóc tách đang trống.");
+                return;
+            }
+
+            showToast("⚡ Đang kích hoạt Pricing Engine & Áp Ma Trận Đơn Giá Nhân Công...");
+            try {
+                const resp = await fetch('/api/cad-takeoff/apply-pricing-and-labor', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentTakeoffData)
+                });
+                const res = await resp.json();
+                if (!resp.ok) throw new Error(res.detail || "Lỗi tính toán báo giá");
+
+                showToast(`🎉 ${res.message}`);
+                // Download Excel immediately
+                if (res.excel_download_url) {
+                    const link = document.createElement('a');
+                    link.href = res.excel_download_url;
+                    link.download = `${res.quote_code}_BaoGia_Vertex.xlsx`;
+                    document.body.appendChild(link);
+                    link.click();
+                    link.remove();
+                }
+                setTimeout(() => {
+                    window.location.href = `/?preloaded_file=`;
+                }, 1500);
+            } catch (err) {
+                showToast(`Lỗi: ${err.message}`);
+            }
+        }
+
+        function updateItemQty(stt, newQty) {
+            if (!currentTakeoffData) return;
+            const item = currentTakeoffData.items.find(i => i.stt === stt);
+            if (item) {
+                item.quantity = parseFloat(newQty) || 1.0;
+                item.base_qty = item.quantity;
+                renderTakeoffUI(currentTakeoffData);
+            }
+        }
+
+        function deleteTakeoffRow(stt) {
+            if (!currentTakeoffData) return;
+            currentTakeoffData.items = currentTakeoffData.items.filter(i => i.stt !== stt);
+            renderTakeoffUI(currentTakeoffData);
+            showToast("Đã xóa hạng mục.");
+        }
+
+        function setCategoryFilter(category, btn) {
+            activeCategoryFilter = category;
+            document.querySelectorAll('.btn-filter-pill').forEach(b => b.classList.remove('active'));
+            if (btn) btn.classList.add('active');
+            renderTableRows();
+        }
+
+        function filterTakeoffTable() {
+            renderTableRows();
+        }
+
+        async function exportTakeoffExcel() {
+            if (!currentTakeoffData || !currentTakeoffData.items || currentTakeoffData.items.length === 0) {
+                showToast("Không có dữ liệu để xuất Excel.");
+                return;
+            }
+
+            showToast("Đang tạo file Excel BOQ Vertex...");
+            try {
+                const resp = await fetch('/api/cad-takeoff/export-excel', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentTakeoffData)
+                });
+
+                if (!resp.ok) throw new Error("Lỗi xuất Excel");
+
+                const blob = await resp.blob();
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `Vertex_CAD_Takeoff_${Date.now()}.xlsx`;
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                showToast("Tải file Excel BOQ thành công!");
+            } catch (err) {
+                showToast(`Lỗi: ${err.message}`);
+            }
+        }
+
+        async function transferToMainQuotePipeline() {
+            if (!currentTakeoffData || !currentTakeoffData.items || currentTakeoffData.items.length === 0) {
+                showToast("Danh mục bóc tách đang trống.");
+                return;
+            }
+
+            showToast("Đang chuyển đổi BOQ sang quy trình Báo Giá Vertex...");
+            try {
+                const resp = await fetch('/api/cad-takeoff/transfer-to-quote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(currentTakeoffData)
+                });
+                const res = await resp.json();
+                if (!resp.ok) throw new Error(res.detail || "Lỗi chuyển dữ liệu");
+
+                showToast(res.message || "Chuyển thành công! Đang mở Dashboard...");
+                setTimeout(() => {
+                    // Navigate to Dashboard with preloaded sample/file
+                    window.location.href = `/?preloaded_file=${encodeURIComponent(res.file_name)}`;
+                }, 800);
+            } catch (err) {
+                showToast(`Lỗi: ${err.message}`);
+            }
+        }
+
+        function openUserGuideModal() {
+            const modal = document.getElementById('user-guide-modal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeUserGuideModal() {
+            const modal = document.getElementById('user-guide-modal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            if (!toast) return;
+            toast.textContent = msg;
+            toast.style.display = 'block';
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3500);
+        }
+    </script>
+
+    <!-- Modal: Hướng Dẫn Sử Dụng (User Guide Modal) -->
+    <div class="modal-backdrop" id="user-guide-modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 980px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-book-open" style="color:var(--vertex-orange-main);"></i> <span>Hướng Dẫn Sử Dụng Hệ Thống Báo Giá Thông Minh Vertex PCCC</span></h3>
+                <button class="btn-close" onclick="closeUserGuideModal()">&times;</button>
+            </div>
+            <div class="modal-body user-guide-body">
+                <div class="guide-intro-banner">
+                    <div class="guide-intro-icon">
+                        <i class="fa-solid fa-fire-extinguisher"></i>
+                    </div>
+                    <div class="guide-intro-text">
+                        <h4>Hệ Thống Tối Ưu Cho Kỹ Sư QS &amp; Nhân Viên Kinh Doanh PCCC - Cơ Điện (MEP)</h4>
+                        <p>Hỗ trợ xử lý nhanh các gói thầu PCCC và M&amp;E từ lúc nhận hồ sơ thiết kế/BOQ đến khi phê duyệt đa cấp và xuất bảng tính Excel hoàn chỉnh.</p>
+                    </div>
+                </div>
+
+                <div class="guide-grid-steps">
+                    <!-- Step 1 -->
+                    <div class="guide-step-card">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num">BƯỚC 1</span>
+                            <div class="guide-step-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        </div>
+                        <h4>Chọn Phương Thức Tiếp Nhận (3 Tab Nghiệp Vụ)</h4>
+                        <p class="guide-desc">Tùy thuộc vào hình thức hồ sơ CĐT cung cấp, chọn 1 trong 3 tab phù hợp:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Tab 1 - Bốc Tách CAD/BIM:</b> Áp dụng khi có bản vẽ <code>.dwg</code>, <code>.dxf</code> hoặc Revit. Kéo thả file để AI tự động quét, bốc khối lượng và phân loại hệ Sprinkler, vách tường, báo cháy, ống gió hút khói/tăng áp.</li>
+                            <li><b>Tab 2 - Nhập BOQ &amp; Chỉ Định Hãng:</b> Áp dụng khi CĐT có yêu cầu kỹ thuật/nhãn hiệu cụ thể (Bơm Ebara, Van ARV, Cáp Cadisun...). Hệ thống đọc thông số và map chính xác tên hãng chỉ định.</li>
+                            <li><b>Tab 3 - Nhập BOQ Thuần &amp; Đề Xuất:</b> Chào giá cạnh tranh tự do. Hệ thống tự động so khớp với <b>Vertex Standard Catalog</b> để đề xuất các hãng tối ưu chi phí.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="guide-step-card">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num">BƯỚC 2</span>
+                            <div class="guide-step-icon"><i class="fa-solid fa-calculator"></i></div>
+                        </div>
+                        <h4>Kiểm Tra Định Mức Vật Tư, Hao Hụt &amp; Nhân Công</h4>
+                        <p class="guide-desc">Hệ thống tự động áp dụng bộ đơn giá nhân công khoán chuẩn của công ty:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Ống chữa cháy:</b> <code>220.000 VNĐ / mét (m)</code></li>
+                            <li><b>Thiết bị báo cháy:</b> <code>350.000 VNĐ / thiết bị</code></li>
+                            <li><b>Đèn Exit / sự cố:</b> <code>370.000 VNĐ / thiết bị</code></li>
+                            <li><b>Ống gió thường:</b> <code>100.000 VNĐ / m²</code></li>
+                            <li><b>Ống gió chống cháy (EI30, EI45, EI60):</b> <code>130.000 VNĐ / m²</code></li>
+                            <li><b>Ống gió chống cháy (EI120):</b> <code>155.000 VNĐ / m²</code></li>
+                            <li><b>Kiểm tra chéo:</b> Tự động tính quang treo (1 bộ/2.5m ống), phụ kiện (18%) và tùy chỉnh hao hụt ngay trên từng dòng.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="guide-step-card">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num">BƯỚC 3</span>
+                            <div class="guide-step-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        </div>
+                        <h4>Cấu Hình Thông Tin Thương Mại &amp; Tính Giá</h4>
+                        <p class="guide-desc">Thiết lập tham số hợp đồng và tổng hợp tài chính chuẩn xác 100%:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Thông Tin Công Trình:</b> Điền đầy đủ Tên khách hàng, Số điện thoại/Zalo, Tên dự án và Địa chỉ công trình.</li>
+                            <li><b>Chiết Khấu &amp; Thuế:</b> Thiết lập tỷ lệ Chiết khấu thương mại (%) và Thuế suất VAT (mặc định <b>8%</b>).</li>
+                            <li><b>Công Thức Tính Giá Chuẩn:</b> Tự động tổng hợp <code>Giá Đơn Vị = (Vật Tư + Nhân Công) &times; Hệ Số Thương Mại</code> với Master Template.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="guide-step-card highlight">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num" style="background:#FF6B35; color:#FFF;">BƯỚC 4</span>
+                            <div class="guide-step-icon" style="background:#FFF7ED; color:#FF6B35;"><i class="fa-solid fa-clipboard-check"></i></div>
+                        </div>
+                        <h4>Trình Duyệt Tự Động &amp; Xuất File Báo Giá</h4>
+                        <p class="guide-desc">Kiểm soát rủi ro tài chính, duyệt đa cấp và xuất file gửi khách hàng:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Trình Duyệt Zalo OA Đa Cấp:</b> Báo giá tiêu chuẩn &rarr; <b>Trưởng phòng kinh doanh (Anh Việt)</b> duyệt trực tiếp; Báo giá lớn (&ge; 100 triệu) &rarr; Tự động đẩy Zalo OA đến <b>Giám đốc (Sếp Tiến)</b> phê duyệt.</li>
+                            <li><b>Xuất File Excel Chuẩn:</b> Bấm <i>"Xuất File Excel BOQ"</i> để tải bảng tính chi tiết (tách bạch rõ chi phí vật tư, nhân công và cột Hãng SX / Xuất xứ).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="guide-footer-tip">
+                    <i class="fa-solid fa-shield-halved" style="color:#10B981; font-size:18px;"></i>
+                    <div>
+                        <b>Lưu Ý Bảo Mật &amp; Phân Quyền (RBAC):</b>
+                        <span>Chỉ tài khoản <b>ADMIN (Sếp Tiến)</b> hoặc <b>MANAGER (Anh Việt)</b> mới có quyền phê duyệt báo giá và quản trị người dùng. Kỹ sư (STAFF) có toàn quyền bóc tách CAD, nhập BOQ và tạo bản dự thảo.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeUserGuideModal()">Đã Hiểu &amp; Bắt Đầu Báo Giá</button>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

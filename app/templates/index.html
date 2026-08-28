@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vertex Construction &amp; PCCC - Hệ Thống Báo Giá &amp; Bóc Tách BOQ Tự Động Bằng AI</title>
+    <!-- Google Fonts & FontAwesome -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/logo-white.svg">
+    <!-- Custom Style -->
+    <link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+    <!-- Top Navigation Header (Vertex Corporate Deep Navy #1B2234) -->
+    <header class="app-header">
+        <div class="header-container">
+            <a href="/" class="brand-block" title="Vertex Construction & PCCC Automation Engine">
+                <img src="/static/images/logo-white.svg" alt="VERTEX CONSTRUCTION & PCCC" class="brand-logo-img" onerror="this.src='/static/images/logo-white.png'">
+            </a>
+            
+            <div class="header-stats">
+                <div class="stat-badge">
+                    <span class="stat-label" data-i18n="stat_total">Tổng Báo Giá</span>
+                    <span class="stat-value" id="stat-total">{{ total_quotes }}</span>
+                </div>
+                <div class="stat-badge badge-warning">
+                    <span class="stat-label" data-i18n="stat_pending">Chờ Duyệt (Zalo)</span>
+                    <span class="stat-value" id="stat-pending">0</span>
+                </div>
+                <div class="stat-badge badge-success">
+                    <span class="stat-label" data-i18n="stat_approved">Đã Duyệt / Gửi</span>
+                    <span class="stat-value" id="stat-approved">0</span>
+                </div>
+            </div>
+
+            <div class="header-actions">
+                <!-- Multi-language Select Dropdown (Clean & Flat UI) -->
+                <div class="lang-selector-wrapper" title="Chọn ngôn ngữ hiển thị">
+                    <select id="language-switcher" class="lang-select" onchange="setLanguage(this.value)">
+                        <option value="vi">🇻🇳 Tiếng Việt</option>
+                        <option value="en">🇬🇧 English</option>
+                        <option value="zh">🇨🇳 简体中文</option>
+                        <option value="ko">🇰🇷 한국어</option>
+                    </select>
+                </div>
+
+                <!-- Master Template & Coefficients Button -->
+                <button class="btn btn-outline" onclick="openMasterTemplateModal()" title="Quản lý File Mẫu Chuẩn & Khung Tỷ Lệ Định Mức">
+                    <i class="fa-solid fa-file-invoice"></i> <span>File Mẫu &amp; Hệ Số</span>
+                </button>
+
+                <!-- User Guide Button -->
+                <button class="btn btn-outline" onclick="openUserGuideModal()" title="Hướng dẫn sử dụng quy trình báo giá 4 bước Vertex">
+                    <i class="fa-solid fa-book-open"></i> <span data-i18n="nav_user_guide">Hướng Dẫn</span>
+                </button>
+
+                <!-- CAD & Revit Takeoff Add-on Button -->
+                <a href="/cad-takeoff" class="btn btn-outline" title="Bóc tách khối lượng từ bản vẽ CAD (.dxf, .dwg) & Revit BIM">
+                    <i class="fa-solid fa-layer-group" style="color:var(--vertex-orange-main);"></i> <span data-i18n="nav_cad_takeoff">Bóc Tách CAD/Revit</span>
+                </a>
+
+                <!-- Field Reports & GPS Attendance Add-on Button -->
+                <a href="/field-reports" class="btn btn-outline" title="Chấm công GPS & Quản lý báo cáo công việc hiện trường">
+                    <i class="fa-solid fa-location-dot" style="color:#10B981;"></i> <span data-i18n="nav_field_report">Chấm Công & Báo Cáo</span>
+                </a>
+
+                {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
+                <button class="btn btn-outline" onclick="openUserManagementModal()" title="Quản trị người dùng & Phân quyền">
+                    <i class="fa-solid fa-users-gear"></i> <span data-i18n="nav_user_mgmt">Quản Trị User</span>
+                </button>
+                {% endif %}
+
+                <a href="/docs" target="_blank" class="btn btn-outline" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code"></i> <span data-i18n="nav_api_docs">API Docs</span>
+                </a>
+
+                <button class="btn btn-primary" onclick="scrollToUpload()">
+                    <i class="fa-solid fa-plus"></i> <span data-i18n="nav_create_quote">Tạo Báo Giá Mới</span>
+                </button>
+
+                <!-- User Profile & RBAC Role Chip -->
+                <div class="user-profile-chip">
+                    <div class="user-avatar">
+                        {{ user.full_name[0] if user and user.full_name else 'V' }}
+                    </div>
+                    <div class="user-meta">
+                        <span class="user-name">{{ user.full_name if user else 'Người dùng' }}</span>
+                        <span class="user-role-tag">
+                            <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
+                        </span>
+                    </div>
+                    <a href="/logout" class="btn-logout" title="Đăng xuất">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- 3-Scenario Workflow Navigation Tabs (QS & PCCC Workflows) -->
+        <div class="scenario-tabs-nav" id="main-scenario-tabs-nav">
+            <button type="button" class="scenario-tab-btn active" id="scenario-tab-cad" onclick="switchScenarioMode('SCENARIO_1_CAD_TAKEOFF')">
+                <div class="tab-icon"><i class="fa-solid fa-compass-drafting"></i></div>
+                <div class="tab-text">
+                    <span class="tab-title">1. Bốc Tách CAD/BIM</span>
+                    <span class="tab-subtitle">Bản vẽ .dwg, .dxf &rarr; Phân loại Sprinkler, Vách Tường, Báo Cháy, Ống Gió</span>
+                </div>
+                <span class="tab-badge">Tự Động AI</span>
+            </button>
+            <button type="button" class="scenario-tab-btn" id="scenario-tab-specified" onclick="switchScenarioMode('SCENARIO_2_SPECIFIED_BRAND')">
+                <div class="tab-icon"><i class="fa-solid fa-file-contract"></i></div>
+                <div class="tab-text">
+                    <span class="tab-title">2. Nhập BOQ &amp; Chỉ Định Hãng</span>
+                    <span class="tab-subtitle">Hồ sơ CĐT chỉ định Ebara, Viking, Hochiki, Paragon, Hòa Phát...</span>
+                </div>
+                <span class="tab-badge">Đọc Tech Spec</span>
+            </button>
+            <button type="button" class="scenario-tab-btn" id="scenario-tab-catalog" onclick="switchScenarioMode('SCENARIO_3_STANDARD_CATALOG')">
+                <div class="tab-icon"><i class="fa-solid fa-layer-group"></i></div>
+                <div class="tab-text">
+                    <span class="tab-title">3. Nhập BOQ Thuần &amp; Đề Xuất</span>
+                    <span class="tab-subtitle">Tự động so khớp Vertex Catalog &amp; Đề xuất Hãng tối ưu chào thầu</span>
+                </div>
+                <span class="tab-badge">Vertex Standard</span>
+            </button>
+        </div>
+
+        <!-- Workflow Banner (4-Step Pipeline) -->
+        <section class="workflow-banner">
+            <div class="banner-title">
+                <h2><i class="fa-solid fa-fire-extinguisher" style="color:var(--vertex-orange-main);"></i> <span data-i18n="workflow_title">Quy Trình Báo Giá Thông Minh Vertex 4 Bước</span></h2>
+                <div style="display:flex; gap:8px; align-items:center; flex-wrap:wrap;">
+                    <span class="chip-tag"><i class="fa-solid fa-file-excel"></i> <span>Mẫu Chuẩn Vertex (Hao hụt {{ ((active_template.waste_ratio or 0.05)*100)|int }}%, VC {{ ((active_template.transport_ratio or 0.03)*100)|int }}%, NC {{ ((active_template.labor_ratio or 0.15)*100)|int }}%, LN {{ ((active_template.margin_ratio or 0.12)*100)|int }}%)</span></span>
+                    <span class="chip-tag"><i class="fa-solid fa-brain"></i> <span data-i18n="badge_ai">Groq AI Tra Giá Thị Trường</span></span>
+                    <span class="chip-tag" style="background: rgba(16,185,129,0.1); border-color: rgba(16,185,129,0.3); color:#059669;"><i class="fa-solid fa-calculator"></i> <span data-i18n="badge_math">Python Math 100% Thuần</span></span>
+                    <button type="button" class="btn btn-outline" style="font-size:11.5px; padding:4px 10px; border-color:rgba(255,107,53,0.4); color:#FF6B35; background:rgba(255,107,53,0.06); font-weight:700; cursor:pointer;" onclick="openUserGuideModal()">
+                        <i class="fa-solid fa-circle-question"></i> <span>Xem Hướng Dẫn 4 Bước</span>
+                    </button>
+                </div>
+            </div>
+            <div class="pipeline-steps">
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-file-circle-check"></i></div>
+                    <div class="step-content">
+                        <h4>1. So Khớp Mẫu Chuẩn</h4>
+                        <p>Lọc vật tư thiếu đơn giá từ file BOQ</p>
+                    </div>
+                </div>
+                <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-magnifying-glass-dollar"></i></div>
+                    <div class="step-content">
+                        <h4>2. AI Tra Giá Thị Trường</h4>
+                        <p>Groq LLM tự động tra giá vật tư còn thiếu</p>
+                    </div>
+                </div>
+                <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                <div class="step-card">
+                    <div class="step-icon"><i class="fa-solid fa-percent"></i></div>
+                    <div class="step-content">
+                        <h4>3. Áp Khung Định Mức %</h4>
+                        <p>Tự động cộng hao hụt, vận chuyển, NC &amp; lợi nhuận</p>
+                    </div>
+                </div>
+                <div class="step-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+                <div class="step-card highlight">
+                    <div class="step-icon" style="background:#FF6B35; color:#FFFFFF;"><i class="fa-solid fa-clipboard-check"></i></div>
+                    <div class="step-content">
+                        <h4>4. Tổng Hợp Dự Thảo &amp; Duyệt</h4>
+                        <p>Sếp Tiến / Anh Việt duyệt trước khi xuất Excel</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Main 2-Column Section -->
+        <div class="dashboard-grid">
+            <!-- Left: Upload & Input Form -->
+            <section class="panel-card" id="upload-section">
+                <div class="panel-header">
+                    <h3><i class="fa-solid fa-cloud-arrow-up" style="color:var(--vertex-orange-main);"></i> <span id="upload-panel-title" data-i18n="upload_title">Tải Lên BOQ / Bản Vẽ PCCC &amp; Cơ Điện</span></h3>
+                    <span class="badge-tag" id="upload-scenario-badge"><i class="fa-solid fa-sparkles"></i> <span data-i18n="upload_ai_badge">Luồng 1: CAD/BIM Takeoff</span></span>
+                </div>
+
+                <form id="quote-upload-form" class="quote-form">
+                    <input type="hidden" id="selected_scenario_type" name="scenario_type" value="SCENARIO_1_CAD_TAKEOFF">
+                    <!-- Dropzone -->
+                    <div class="dropzone" id="dropzone">
+                        <input type="file" id="file-input" name="file" accept=".xlsx,.xls,.dxf,.dwg,.pdf,.csv" required>
+                        <div class="dropzone-content">
+                            <i class="fa-solid fa-file-circle-plus drop-icon" id="dropzone-icon"></i>
+                            <h4 id="dropzone-header-text"><span data-i18n="dropzone_title">Kéo thả file vào đây hoặc</span> <span class="browse-btn" data-i18n="dropzone_browse">chọn file từ máy tính</span></h4>
+                            <p class="dropzone-hint" id="dropzone-hint-text" data-i18n="dropzone_hint">Hỗ trợ định dạng: Bản vẽ CAD (.dwg, .dxf), BIM (.rvt), Excel (.xlsx, .xls), PDF hoặc CSV</p>
+                            <div id="selected-file-info" class="selected-file-info" style="display: none;">
+                                <i class="fa-solid fa-check-circle"></i> <span id="file-name-display"></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Customer & Project Info Form Fields -->
+                    <div class="form-grid">
+                        <div class="form-group" style="grid-column: span 2;">
+                            <div class="template-header-row">
+                                <label><i class="fa-solid fa-file-invoice"></i> <span>File Mẫu Chuẩn &amp; Định Mức (Xương Sống Báo Giá)</span></label>
+                                <button type="button" class="btn-toggle-tpl" id="btn-toggle-tpl" onclick="toggleTemplateUploadBox()">
+                                    <i class="fa-solid fa-cloud-arrow-up"></i> <span id="toggle-tpl-label">Tải Lên Mẫu Mới (.xlsx, .pdf, .csv)</span>
+                                </button>
+                            </div>
+                            <select name="template_id" id="template_id" class="form-select" style="width:100%; padding:10px; border-radius:6px; border:1px solid #CBD5E1; background:#FFF; font-weight:600; color:#1E293B;">
+                                {% for tpl in templates_list %}
+                                <option value="{{ tpl.id }}" {% if tpl.is_active %}selected{% endif %}>
+                                    {{ tpl.name }} (Hao hụt: {{ ((tpl.waste_ratio or 0.05)*100)|int }}%, Vận chuyển: {{ ((tpl.transport_ratio or 0.03)*100)|int }}%, NC: {{ ((tpl.labor_ratio or 0.15)*100)|int }}%, Lợi nhuận: {{ ((tpl.margin_ratio or 0.12)*100)|int }}%)
+                                </option>
+                                {% endfor %}
+                            </select>
+
+                            <!-- Dedicated Drag & Drop Dropzone for Master Template Files -->
+                            <div class="template-upload-container" id="template-upload-container">
+                                <div class="template-mini-dropzone" id="template-mini-dropzone">
+                                    <input type="file" id="direct-template-file" accept=".xlsx,.xls,.pdf,.csv" onchange="handleDirectTemplateUpload(this.files[0])">
+                                    <div class="template-mini-content">
+                                        <div class="tpl-icon-circle"><i class="fa-solid fa-file-excel"></i></div>
+                                        <div class="tpl-text-block">
+                                            <b>Kéo thả File Mẫu Chuẩn Mới (.xlsx, .pdf, .csv) vào đây hoặc <span class="browse-tpl-link">chọn từ máy tính</span></b>
+                                            <p>Hệ thống tự động lưu vào thư mục templates & cập nhật ngay vào dropdown để AI bám theo định mức</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="template-uploading-bar" class="template-uploading-bar" style="display:none;">
+                                    <i class="fa-solid fa-circle-notch fa-spin"></i> Đang tải lên và cập nhật danh mục Mẫu Chuẩn...
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-building"></i> <span data-i18n="customer_name_lbl">Tên Khách Hàng / Nhà Thầu</span> <span class="req">*</span></label>
+                            <input type="text" name="customer_name" id="customer_name" value="Tập Đoàn Xây Dựng Delta" required placeholder="VD: Tập đoàn Delta, Coteccons...">
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-phone"></i> <span data-i18n="customer_phone_lbl">Số Điện Thoại / Zalo</span></label>
+                            <input type="text" name="customer_phone" id="customer_phone" value="0912.888.999" placeholder="VD: 0912345678">
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-map-location-dot"></i> <span data-i18n="project_name_lbl">Tên Dự Án / Công Trình PCCC</span> <span class="req">*</span></label>
+                            <input type="text" name="project_name" id="project_name" value="Khách Sạn 5 Sao Delta Grand" required placeholder="VD: Nhà máy Dược Phẩm, Khách sạn Mường Thanh...">
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-location-dot"></i> <span data-i18n="project_address_lbl">Địa Chỉ Công Trình</span></label>
+                            <input type="text" name="project_address" id="project_address" value="Lô B2, KĐT Ngoại Giao Đoàn, Bắc Từ Liêm, Hà Nội" placeholder="Địa chỉ giao hàng">
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-percent"></i> <span data-i18n="discount_rate_lbl">Chiết Khấu Thương Mại (%)</span></label>
+                            <input type="number" name="discount_rate_display" id="discount_rate_display" value="5" min="0" max="50" step="1">
+                        </div>
+
+                        <div class="form-group">
+                            <label><i class="fa-solid fa-receipt"></i> <span data-i18n="vat_rate_lbl">Thuế VAT (%)</span></label>
+                            <input type="number" name="vat_rate_display" id="vat_rate_display" value="8" min="0" max="20" step="1">
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="form-actions">
+                        <div class="sample-downloads">
+                            <span class="sample-label"><i class="fa-solid fa-lightbulb"></i> <span data-i18n="sample_label">File mẫu thử nghiệm:</span></span>
+                            <button type="button" class="btn-sample" onclick="loadSampleBOQ('excel')">
+                                <i class="fa-solid fa-file-excel" style="color:#10B981;"></i> <span data-i18n="sample_excel">Excel PCCC &amp; MEP</span>
+                            </button>
+                            <button type="button" class="btn-sample" onclick="loadSampleBOQ('cad')">
+                                <i class="fa-solid fa-drafting-compass" style="color:#3B82F6;"></i> <span data-i18n="sample_cad">CAD DXF</span>
+                            </button>
+                            <a href="/api/templates/active/download" class="btn-sample" style="text-decoration:none; color:inherit;">
+                                <i class="fa-solid fa-download" style="color:#FF6B35;"></i> Tải Mẫu Chuẩn Vertex
+                            </a>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-submit" id="btn-submit">
+                            <i class="fa-solid fa-bolt"></i> <span data-i18n="btn_process_quote">Kích Hoạt AI Bóc Tách &amp; Báo Giá</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Processing Terminal Log -->
+                <div class="agent-terminal" id="agent-terminal" style="display: none;">
+                    <div class="terminal-header">
+                        <span class="terminal-dot red"></span>
+                        <span class="terminal-dot yellow"></span>
+                        <span class="terminal-dot green"></span>
+                        <span class="terminal-title"><i class="fa-solid fa-robot"></i> <span data-i18n="terminal_title">AI Agent Logs - Tiến Trình Xử Lý Thời Gian Thực</span></span>
+                    </div>
+                    <div class="terminal-body" id="terminal-logs">
+                        <!-- Dynamic agent logs -->
+                    </div>
+                </div>
+            </section>
+
+            <!-- Right: Interactive Zalo OA Approval Card -->
+            <section class="panel-card zalo-panel-card" style="display:flex; flex-direction:column;">
+                <!-- Zalo OA Interactive Simulator -->
+                <div class="zalo-simulator-card" style="flex:1; display:flex; flex-direction:column;">
+                    <div class="zalo-sim-header">
+                        <div class="zalo-brand">
+                            <i class="fa-brands fa-whatsapp zalo-icon"></i>
+                            <div>
+                                <h4><span data-i18n="zalo_sim_title">Zalo OA Báo Giá Vertex PCCC</span> <span class="badge-online"><i class="fa-solid fa-circle" style="font-size:8px;"></i> Online</span></h4>
+                                <p data-i18n="zalo_sim_desc">Tự động đẩy thẻ duyệt tương tác tới Sếp Tiến &amp; Anh Việt</p>
+                            </div>
+                        </div>
+                        <span class="sim-badge" data-i18n="zalo_sim_badge">Official Simulator</span>
+                    </div>
+                    <div class="zalo-sim-body" id="zalo-bubble" style="flex:1; min-height:340px;">
+                        <div class="zalo-empty-state">
+                            <i class="fa-solid fa-comments"></i>
+                            <h4 data-i18n="zalo_empty_title">Chưa có yêu cầu báo giá mới</h4>
+                            <p data-i18n="zalo_empty_desc">Khi bạn tải lên BOQ, hệ thống sẽ tự động gửi thẻ báo giá tương tác kèm nút [Duyệt] &amp; [Từ chối] tại đây.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Middle Full-Width Section: PCCC & MEP Equipment Price Catalog (Full Width Layout) -->
+        <section class="panel-card catalog-section" id="catalog-section">
+            <div class="panel-header" style="flex-wrap: wrap; gap: 12px;">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <h3><i class="fa-solid fa-fire-burner" style="color:var(--vertex-orange-main);"></i> <span data-i18n="catalog_title">Bảng Giá Chuẩn Thiết Bị PCCC &amp; Cơ Điện (Vertex)</span></h3>
+                    <span class="badge-tag" style="background:#EEF2F6; color:var(--vertex-navy-main); border-color:#CBD5E1;">
+                        {{ catalog|length }} Thiết Bị
+                    </span>
+                </div>
+                <div class="catalog-toolbar" style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <div class="search-box-sm" style="min-width: 240px; background:#FFFFFF; border:1px solid #CBD5E1; padding:6px 10px; border-radius:6px; display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-magnifying-glass" style="color:#94A3B8;"></i>
+                        <input type="text" id="catalog-search" placeholder="Tìm kiếm nhanh mã, tên thiết bị, vật tư..." onkeyup="filterCatalogTable()" style="border:none; outline:none; width:100%; font-size:12px;">
+                    </div>
+                    <div class="catalog-filter-pills" style="display:flex; gap:4px; flex-wrap:wrap;">
+                        <button type="button" class="btn-filter-pill active" onclick="setCatalogCategoryFilter('all', this)">Tất Cả</button>
+                        <button type="button" class="btn-filter-pill" onclick="setCatalogCategoryFilter('Bình chữa cháy', this)">Bình Chữa Cháy</button>
+                        <button type="button" class="btn-filter-pill" onclick="setCatalogCategoryFilter('Báo cháy', this)">Báo Cháy</button>
+                        <button type="button" class="btn-filter-pill" onclick="setCatalogCategoryFilter('Chữa cháy nước', this)">Chữa Cháy Nước</button>
+                        <button type="button" class="btn-filter-pill" onclick="setCatalogCategoryFilter('Van ngăn cháy', this)">Van Ngăn Cháy</button>
+                        <button type="button" class="btn-filter-pill" onclick="setCatalogCategoryFilter('Ống gió', this)">Ống Gió &amp; Phụ Kiện</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="table-responsive catalog-table-container" style="max-height: 420px; overflow-y: auto; border: 1px solid #E2E8F0; border-radius: var(--radius-sm);">
+                <table class="data-table" id="catalog-table">
+                    <thead style="position: sticky; top: 0; z-index: 2; background: #F8FAFC;">
+                        <tr>
+                            <th style="width: 100px;" data-i18n="catalog_col_code">Mã Vật Tư</th>
+                            <th data-i18n="catalog_col_name">Tên Thiết Bị / Vật Tư PCCC &amp; Cơ Điện</th>
+                            <th style="width: 140px;">Phân Loại</th>
+                            <th style="width: 140px;">Quy Cách / Vật Liệu</th>
+                            <th style="width: 70px; text-align: center;" data-i18n="catalog_col_unit">ĐVT</th>
+                            <th style="width: 130px; text-align: right;" data-i18n="catalog_col_price">Đơn Giá Chuẩn</th>
+                        </tr>
+                    </thead>
+                    <tbody id="catalog-tbody">
+                        {% for item in catalog %}
+                        <tr data-category="{{ item.category or '' }}">
+                            <td><code>{{ item.code }}</code></td>
+                            <td>
+                                <b>{{ item.name }}</b>
+                            </td>
+                            <td>
+                                <span class="unit-tag" style="background:#EFF6FF; color:#1D4ED8; border-color:#BFDBFE;">{{ item.category or 'Vật tư PCCC' }}</span>
+                            </td>
+                            <td>
+                                <span style="font-size: 11.5px; color:#475569;">{{ item.material or '-' }}{% if item.thickness %} ({{ item.thickness }}mm){% endif %}</span>
+                            </td>
+                            <td style="text-align: center;"><span class="unit-tag">{{ item.unit }}</span></td>
+                            <td class="price-val" style="color:var(--vertex-navy-main); font-family:'JetBrains Mono', monospace;">{{ "{:,.0f}".format(item.unit_price) }} đ</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Bottom Section: Quotations List Table -->
+        <section class="panel-card quotes-history-card">
+            <div class="panel-header">
+                <h3><i class="fa-solid fa-list-check" style="color:var(--vertex-orange-main);"></i> <span data-i18n="quotes_history_title">Danh Sách Báo Giá Gần Đây</span></h3>
+                <div class="filter-group">
+                    <button class="btn-filter active" onclick="filterQuotes('ALL')" data-i18n="filter_all">Tất Cả</button>
+                    <button class="btn-filter" onclick="filterQuotes('PENDING_APPROVAL')" data-i18n="filter_pending">Chờ TP Duyệt</button>
+                    <button class="btn-filter" onclick="filterQuotes('PENDING_DIRECTOR_APPROVAL')">Chờ GĐ Duyệt</button>
+                    <button class="btn-filter" onclick="filterQuotes('APPROVED')" data-i18n="filter_approved">Đã Duyệt</button>
+                    <button class="btn-filter" onclick="filterQuotes('SENT_TO_CUSTOMER')" data-i18n="filter_sent">Đã Gửi Khách</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table class="data-table" id="quotes-table">
+                    <thead>
+                        <tr>
+                            <th data-i18n="col_quote_code">Mã Báo Giá</th>
+                            <th data-i18n="col_customer_project">Khách Hàng &amp; Dự Án</th>
+                            <th>Mẫu Định Mức</th>
+                            <th data-i18n="col_created_at">Ngày Lập</th>
+                            <th data-i18n="col_subtotal">Tổng Tiền Hàng</th>
+                            <th data-i18n="col_discount_vat">Chiết Khấu / VAT</th>
+                            <th data-i18n="col_total_amount">Tổng Thanh Toán</th>
+                            <th data-i18n="col_status">Trạng Thái &amp; Cấp Duyệt</th>
+                            <th data-i18n="col_actions">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody id="quotes-tbody">
+                        <!-- Loaded dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal: Xem Chi Tiết Báo Giá & Bóc Tách (Tích Hợp Version Control & Audit Trail) -->
+    <div class="modal-backdrop" id="quote-modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 1020px;">
+            <div class="modal-header">
+                <h3 id="modal-title"><i class="fa-solid fa-file-lines" style="color:var(--vertex-orange-main);"></i> Chi Tiết Báo Giá</h3>
+                <button class="btn-close" onclick="closeQuoteModal()">&times;</button>
+            </div>
+            
+            <!-- Modal Sub-Navigation Tabs -->
+            <div class="modal-tab-bar" style="display:flex; gap:6px; padding:8px 16px; background:#F8FAFC; border-bottom:1px solid #E2E8F0;">
+                <button type="button" class="btn-modal-tab active" id="modal-tab-items-btn" onclick="switchQuoteModalTab('items')">
+                    <i class="fa-solid fa-list-check"></i> <span>Chi Tiết Bóc Tách &amp; Vật Tư</span>
+                </button>
+                <button type="button" class="btn-modal-tab" id="modal-tab-versions-btn" onclick="switchQuoteModalTab('versions')">
+                    <i class="fa-solid fa-code-branch"></i> <span>Lịch Sử Phiên Bản (<span id="modal-version-count">1</span>)</span>
+                </button>
+                <button type="button" class="btn-modal-tab" id="modal-tab-audit-btn" onclick="switchQuoteModalTab('audit')">
+                    <i class="fa-solid fa-clock-rotate-left"></i> <span>Nhật Ký Kiểm Toán (Audit Trail)</span>
+                </button>
+            </div>
+
+            <div class="modal-body" id="modal-content" style="max-height: calc(85vh - 160px); overflow-y:auto; padding:16px;">
+                <!-- Dynamic Quote Content rendered via JS -->
+            </div>
+            <div class="modal-footer" id="modal-footer">
+                <!-- Action buttons -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Quản Lý File Mẫu Chuẩn & Khung Tỷ Lệ Định Mức -->
+    <div class="modal-backdrop" id="template-mgmt-modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 880px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-file-invoice" style="color:var(--vertex-orange-main);"></i> Quản Lý File Mẫu Chuẩn &amp; Khung Hệ Số Định Mức</h3>
+                <button class="btn-close" onclick="closeMasterTemplateModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div style="background: #F8FAFC; border: 1px solid #E2E8F0; border-radius: 8px; padding: 14px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                        <h4 style="margin: 0; color: #1E293B; font-size: 15px;"><i class="fa-solid fa-shield-check" style="color:#10B981;"></i> Mẫu Chuẩn Áp Dụng: <span id="tpl-active-name" style="color:#FF6B35;">{{ active_template.name }}</span></h4>
+                        <a href="/api/templates/active/download" class="btn btn-outline" style="font-size: 11px; padding: 4px 8px;">
+                            <i class="fa-solid fa-download"></i> Tải File Excel Mẫu
+                        </a>
+                    </div>
+                    <p id="tpl-active-desc" style="font-size: 12.5px; color: #64748B; margin: 0 0 10px 0;">{{ active_template.description }}</p>
+                    
+                    <!-- Coefficients Editor Form -->
+                    <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-top: 10px;">
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:11px; font-weight:700;">Hao Hụt (%)</label>
+                            <input type="number" id="coeff_waste" value="{{ ((active_template.waste_ratio or 0.05) * 100)|int }}" min="0" max="50" step="0.5" style="padding:6px; font-size:13px; font-weight:700; width:100%; border:1px solid #CBD5E1; border-radius:4px;" onchange="calculateLiveMultiplier()">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:11px; font-weight:700;">Vận Chuyển (%)</label>
+                            <input type="number" id="coeff_transport" value="{{ ((active_template.transport_ratio or 0.03) * 100)|int }}" min="0" max="50" step="0.5" style="padding:6px; font-size:13px; font-weight:700; width:100%; border:1px solid #CBD5E1; border-radius:4px;" onchange="calculateLiveMultiplier()">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:11px; font-weight:700;">Nhân Công (%)</label>
+                            <input type="number" id="coeff_labor" value="{{ ((active_template.labor_ratio or 0.15) * 100)|int }}" min="0" max="50" step="0.5" style="padding:6px; font-size:13px; font-weight:700; width:100%; border:1px solid #CBD5E1; border-radius:4px;" onchange="calculateLiveMultiplier()">
+                        </div>
+                        <div class="form-group" style="margin:0;">
+                            <label style="font-size:11px; font-weight:700;">Lợi Nhuận (%)</label>
+                            <input type="number" id="coeff_margin" value="{{ ((active_template.margin_ratio or 0.12) * 100)|int }}" min="0" max="50" step="0.5" style="padding:6px; font-size:13px; font-weight:700; width:100%; border:1px solid #CBD5E1; border-radius:4px;" onchange="calculateLiveMultiplier()">
+                        </div>
+                    </div>
+
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-top:12px; padding-top:10px; border-top:1px dashed #CBD5E1;">
+                        <span style="font-size:12.5px; font-weight:700; color:#1E293B;">
+                            Tổng Hệ Số Nhân Áp Dụng Vào Giá Thô AI: <span id="coeff_multiplier_preview" style="color:#FF6B35; font-size:14px;">1.35x (+35%)</span>
+                        </span>
+                        <button class="btn btn-primary" onclick="saveTemplateCoefficients()" style="font-size:12px; padding:6px 12px;">
+                            <i class="fa-solid fa-floppy-disk"></i> Lưu Khung Hệ Số
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Template Upload Form -->
+                <div style="border:1px dashed #94A3B8; border-radius:8px; padding:14px; background:#FAFAFA;">
+                    <h4 style="margin:0 0 8px 0; font-size:13.5px; color:#1E293B;"><i class="fa-solid fa-cloud-arrow-up" style="color:#FF6B35;"></i> Tải Lên File Mẫu Chuẩn Mới (.xlsx)</h4>
+                    <form id="template-upload-form" onsubmit="handleUploadNewTemplate(event)" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                        <input type="file" id="tpl-file-input" name="file" accept=".xlsx" required style="font-size:12px; flex:1;">
+                        <input type="text" id="tpl-name-input" name="name" placeholder="Tên mẫu (VD: Mẫu PCCC &amp; Cơ Điện 2026)" style="font-size:12px; padding:6px 10px; border:1px solid #CBD5E1; border-radius:4px; flex:2;">
+                        <button type="submit" class="btn btn-outline-dark" style="font-size:12px; padding:6px 12px;">
+                            <i class="fa-solid fa-upload"></i> Nạp File Mẫu
+                        </button>
+                    </form>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-dark" onclick="closeMasterTemplateModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Quản Trị Người Dùng (Admin User Management) -->
+    <div class="modal-backdrop" id="user-mgmt-modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 880px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-users-gear" style="color:var(--vertex-orange-main);"></i> Quản Trị Tài Khoản Người Dùng (Admin RBAC)</h3>
+                <button class="btn-close" onclick="closeUserManagementModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:12.5px; color:#64748B; margin-bottom:14px;">
+                    Duyệt kích hoạt tài khoản mới đăng ký, phân bổ vai trò (Admin, Manager, Staff, Dealer, Partner) hoặc khóa tài khoản khi cần thiết.
+                </p>
+                <div class="table-responsive" style="max-height:380px; overflow-y:auto;">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th style="width:40px; text-align:center;">STT</th>
+                                <th>Họ Tên &amp; Username</th>
+                                <th>Công Ty / Đơn Vị</th>
+                                <th>Liên Hệ</th>
+                                <th>Vai Trò (Role)</th>
+                                <th>Trạng Thái</th>
+                                <th>Thao Tác</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-tbody">
+                            <!-- Dynamic user rows loaded via loadUsersList() -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline-dark" onclick="closeUserManagementModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Hướng Dẫn Sử Dụng (User Guide Modal) -->
+    <div class="modal-backdrop" id="user-guide-modal" style="display: none;">
+        <div class="modal-dialog" style="max-width: 980px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-book-open" style="color:var(--vertex-orange-main);"></i> <span data-i18n="user_guide_title">Hướng Dẫn Sử Dụng Hệ Thống Báo Giá Thông Minh Vertex PCCC</span></h3>
+                <button class="btn-close" onclick="closeUserGuideModal()">&times;</button>
+            </div>
+            <div class="modal-body user-guide-body">
+                <div class="guide-intro-banner">
+                    <div class="guide-intro-icon">
+                        <i class="fa-solid fa-fire-extinguisher"></i>
+                    </div>
+                    <div class="guide-intro-text">
+                        <h4>Hệ Thống Tối Ưu Cho Kỹ Sư QS &amp; Nhân Viên Kinh Doanh PCCC - Cơ Điện (MEP)</h4>
+                        <p>Hỗ trợ xử lý nhanh các gói thầu PCCC và M&amp;E từ lúc nhận hồ sơ thiết kế/BOQ đến khi phê duyệt đa cấp và xuất bảng tính Excel hoàn chỉnh.</p>
+                    </div>
+                </div>
+
+                <div class="guide-grid-steps">
+                    <!-- Step 1 -->
+                    <div class="guide-step-card">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num">BƯỚC 1</span>
+                            <div class="guide-step-icon"><i class="fa-solid fa-layer-group"></i></div>
+                        </div>
+                        <h4>Chọn Phương Thức Tiếp Nhận (3 Tab Nghiệp Vụ)</h4>
+                        <p class="guide-desc">Tùy thuộc vào hình thức hồ sơ CĐT cung cấp, chọn 1 trong 3 tab phù hợp:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Tab 1 - Bốc Tách CAD/BIM:</b> Áp dụng khi có bản vẽ <code>.dwg</code>, <code>.dxf</code> hoặc Revit. Kéo thả file để AI tự động quét, bốc khối lượng và phân loại hệ Sprinkler, vách tường, báo cháy, ống gió hút khói/tăng áp.</li>
+                            <li><b>Tab 2 - Nhập BOQ &amp; Chỉ Định Hãng:</b> Áp dụng khi CĐT có yêu cầu kỹ thuật/nhãn hiệu cụ thể (Bơm Ebara, Van ARV, Cáp Cadisun...). Hệ thống đọc thông số và map chính xác tên hãng chỉ định.</li>
+                            <li><b>Tab 3 - Nhập BOQ Thuần &amp; Đề Xuất:</b> Chào giá cạnh tranh tự do. Hệ thống tự động so khớp với <b>Vertex Standard Catalog</b> để đề xuất các hãng tối ưu chi phí.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div class="guide-step-card">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num">BƯỚC 2</span>
+                            <div class="guide-step-icon"><i class="fa-solid fa-calculator"></i></div>
+                        </div>
+                        <h4>Kiểm Tra Định Mức Vật Tư, Hao Hụt &amp; Nhân Công</h4>
+                        <p class="guide-desc">Hệ thống tự động áp dụng bộ đơn giá nhân công khoán chuẩn của công ty:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Ống chữa cháy:</b> <code>220.000 VNĐ / mét (m)</code></li>
+                            <li><b>Thiết bị báo cháy:</b> <code>350.000 VNĐ / thiết bị</code></li>
+                            <li><b>Đèn Exit / sự cố:</b> <code>370.000 VNĐ / thiết bị</code></li>
+                            <li><b>Ống gió thường:</b> <code>100.000 VNĐ / m²</code></li>
+                            <li><b>Ống gió chống cháy (EI30, EI45, EI60):</b> <code>130.000 VNĐ / m²</code></li>
+                            <li><b>Ống gió chống cháy (EI120):</b> <code>155.000 VNĐ / m²</code></li>
+                            <li><b>Kiểm tra chéo:</b> Tự động tính quang treo (1 bộ/2.5m ống), phụ kiện (18%) và tùy chỉnh hao hụt ngay trên từng dòng.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div class="guide-step-card">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num">BƯỚC 3</span>
+                            <div class="guide-step-icon"><i class="fa-solid fa-file-invoice-dollar"></i></div>
+                        </div>
+                        <h4>Cấu Hình Thông Tin Thương Mại &amp; Tính Giá</h4>
+                        <p class="guide-desc">Thiết lập tham số hợp đồng và tổng hợp tài chính chuẩn xác 100%:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Thông Tin Công Trình:</b> Điền đầy đủ Tên khách hàng, Số điện thoại/Zalo, Tên dự án và Địa chỉ công trình.</li>
+                            <li><b>Chiết Khấu &amp; Thuế:</b> Thiết lập tỷ lệ Chiết khấu thương mại (%) và Thuế suất VAT (mặc định <b>8%</b>).</li>
+                            <li><b>Công Thức Tính Giá Chuẩn:</b> Tự động tổng hợp <code>Giá Đơn Vị = (Vật Tư + Nhân Công) &times; Hệ Số Thương Mại</code> với Master Template.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Step 4 -->
+                    <div class="guide-step-card highlight">
+                        <div class="guide-step-header">
+                            <span class="guide-step-num" style="background:#FF6B35; color:#FFF;">BƯỚC 4</span>
+                            <div class="guide-step-icon" style="background:#FFF7ED; color:#FF6B35;"><i class="fa-solid fa-clipboard-check"></i></div>
+                        </div>
+                        <h4>Trình Duyệt Tự Động &amp; Xuất File Báo Giá</h4>
+                        <p class="guide-desc">Kiểm soát rủi ro tài chính, duyệt đa cấp và xuất file gửi khách hàng:</p>
+                        <ul class="guide-bullet-list">
+                            <li><b>Trình Duyệt Zalo OA Đa Cấp:</b> Báo giá tiêu chuẩn &rarr; <b>Trưởng phòng kinh doanh (Anh Việt)</b> duyệt trực tiếp; Báo giá lớn (&ge; 100 triệu) &rarr; Tự động đẩy Zalo OA đến <b>Giám đốc (Sếp Tiến)</b> phê duyệt.</li>
+                            <li><b>Xuất File Excel Chuẩn:</b> Bấm <i>"Xuất File Excel BOQ"</i> để tải bảng tính chi tiết (tách bạch rõ chi phí vật tư, nhân công và cột Hãng SX / Xuất xứ).</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="guide-footer-tip">
+                    <i class="fa-solid fa-shield-halved" style="color:#10B981; font-size:18px;"></i>
+                    <div>
+                        <b>Lưu Ý Bảo Mật &amp; Phân Quyền (RBAC):</b>
+                        <span>Chỉ tài khoản <b>ADMIN (Sếp Tiến)</b> hoặc <b>MANAGER (Anh Việt)</b> mới có quyền phê duyệt báo giá và quản trị người dùng. Kỹ sư (STAFF) có toàn quyền bóc tách CAD, nhập BOQ và tạo bản dự thảo.</span>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeUserGuideModal()">Đã Hiểu &amp; Bắt Đầu Báo Giá</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Author & Support Footer (Bottom Right Corner) -->
+    <div class="author-floating-footer" title="Thông tin phát triển &amp; hỗ trợ kỹ thuật">
+        <i class="fa-solid fa-headset" style="color:var(--vertex-orange-main); font-size:12.5px;"></i>
+        <span class="footer-author-text">Phát triển bởi: <b>Nguyễn Quốc Việt</b></span>
+        <span class="footer-sep">|</span>
+        <a href="tel:0364399202" class="footer-hotline-btn">
+            <i class="fa-solid fa-phone" style="font-size:10px;"></i> Hotline: <b>0364399202</b>
+        </a>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        window.CURRENT_USER_ID = "{{ user.id if user else '' }}";
+        window.ACTIVE_TEMPLATE_ID = "{{ active_template.id if active_template else 'tpl-vertex-master-default' }}";
+    </script>
+    <script src="/static/js/i18n.js"></script>
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

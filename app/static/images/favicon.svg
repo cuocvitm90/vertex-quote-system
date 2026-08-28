@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="oGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7D47" />
+      <stop offset="100%" stop-color="#E8590C" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="22" fill="#1B2234" />
+  <g transform="translate(10, 8)">
+    <path d="M 6 80 L 6 36 L 24 22 L 24 80 Z" fill="url(#oGrad)" />
+    <path d="M 28 80 L 28 10 L 52 2 L 52 80 Z" fill="#FFFFFF" stroke="#FF6B35" stroke-width="1.5" />
+    <rect x="33" y="16" width="6" height="6" rx="1" fill="#FF6B35" />
+    <rect x="43" y="16" width="6" height="6" rx="1" fill="#1B2234" />
+    <rect x="33" y="28" width="6" height="6" rx="1" fill="#1B2234" />
+    <rect x="43" y="28" width="6" height="6" rx="1" fill="#FF6B35" />
+    <rect x="33" y="40" width="6" height="6" rx="1" fill="#FF6B35" />
+    <rect x="43" y="40" width="6" height="6" rx="1" fill="#1B2234" />
+    <rect x="33" y="52" width="6" height="6" rx="1" fill="#1B2234" />
+    <rect x="43" y="52" width="6" height="6" rx="1" fill="#FF6B35" />
+    <path d="M 56 80 L 56 22 L 74 36 L 74 80 Z" fill="url(#oGrad)" />
+    <rect x="2" y="80" width="76" height="4" rx="2" fill="#FF6B35" />
+  </g>
+</svg>

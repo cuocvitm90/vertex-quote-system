@@ -1,0 +1,40 @@
+# ==============================================================================
+# Vertex Construction & PCCC - Docker Ignore Rules
+# Keeps Docker image build lean, secure, and fast
+# ==============================================================================
+
+# Git & Version Control
+.git/
+.gitignore
+.github/
+
+# Virtual Environment & Packages
+venv/
+env/
+.venv/
+
+# Python Cache & Bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Local Secrets & Temp Configs
+.env
+.env.local
+*.secret
+
+# Local database & temp uploads (Storage volume is mounted at runtime)
+storage/*.db
+storage/uploads/*
+storage/quotes/*
+storage/reference_gdrive/*
+
+# Logs & OS metadata
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

@@ -1,0 +1,58 @@
+# ==============================================================================
+# Vertex Construction & PCCC - Git Ignore Rules (Enterprise Security Hardened)
+# ==============================================================================
+
+# ===== Môi trường & Secrets (QUAN TRỌNG NHẤT) =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+*.secret
+
+# ===== Database =====
+storage/vertex_quotes.db
+storage/*.db
+storage/*.sqlite3
+*.db-journal
+
+# ===== File upload người dùng & Generated files =====
+storage/uploads/
+storage/quotes/
+storage/templates/*.xlsx
+storage/templates/*.csv
+!storage/uploads/.gitkeep
+!storage/quotes/.gitkeep
+!storage/templates/.gitkeep
+!storage/reference_gdrive/.gitkeep
+!storage/samples/
+
+# ===== Python =====
+venv/
+env/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.py[cod]
+*$py.class
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# ===== IDE / OS =====
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ===== Logs & Agent System =====
+*.log
+logs/
+.system_generated/

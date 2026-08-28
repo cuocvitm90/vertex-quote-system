@@ -1,0 +1,51 @@
+version: '3.8'
+
+# ==============================================================================
+# Vertex Construction & PCCC - Production Docker Compose Deployment
+# 1-Click Deployment for Cloud Server / On-Premise VM
+# ==============================================================================
+
+services:
+  vertex-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: vertex-quote-system
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env
+    environment:
+      - APP_ENV=production
+      - HOST=0.0.0.0
+      - PORT=8000
+      - WEB_CONCURRENCY=4
+    volumes:
+      # Persistent storage for SQLite database, uploaded BOQ files, and generated Excel quotes
+      - ./storage:/app/storage
+      # Product price catalog
+      - ./data:/app/data
+    deploy:
+      resources:
+        limits:
+          cpus: '2.00'
+          memory: 2048M
+        reservations:
+          cpus: '0.50'
+          memory: 512M
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "20m"
+        max-file: "5"
+
+networks:
+  default:
+    name: vertex-network

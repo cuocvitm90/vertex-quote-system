@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Ký Tài Khoản (Chờ Duyệt) - VERTEX CONSTRUCTION & PCCC</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="alternate icon" href="/static/images/logo-icon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .register-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 25%, #222C42 0%, #141A29 70%, #0D121D 100%);
+            padding: 30px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .register-page::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.18) 0%, rgba(255, 107, 53, 0) 70%);
+            top: -120px;
+            right: -120px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .register-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 18px;
+            max-width: 540px;
+            width: 100%;
+            padding: 32px 30px;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35);
+            position: relative;
+            z-index: 10;
+        }
+
+        .reg-brand-header {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .reg-logo-img {
+            max-height: 52px;
+            width: auto;
+            margin: 0 auto 10px;
+            display: block;
+        }
+
+        .reg-tagline {
+            font-size: 11.5px;
+            color: #64748B;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .approval-notice-banner {
+            background: #FFFBEB;
+            border: 1px solid #FCD34D;
+            color: #92400E;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 12px;
+            line-height: 1.45;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .approval-notice-banner i {
+            color: #D97706;
+            font-size: 15px;
+            margin-top: 1px;
+            flex-shrink: 0;
+        }
+
+        .form-grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .reg-form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            margin-bottom: 12px;
+        }
+
+        .reg-form-group label {
+            font-size: 11.5px;
+            font-weight: 700;
+            color: #334155;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .input-wrap {
+            position: relative;
+        }
+
+        .input-wrap i {
+            position: absolute;
+            left: 11px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            font-size: 12px;
+        }
+
+        .input-wrap input, .input-wrap select {
+            width: 100%;
+            padding: 9px 12px 9px 32px;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            color: #0F172A;
+            font-size: 13px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .input-wrap input:focus, .input-wrap select:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+            background: #FFFFFF;
+        }
+
+        .btn-register-submit {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F77F00 100%);
+            border: none;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 13.5px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35);
+            transition: all 0.2s ease;
+            margin-top: 6px;
+        }
+
+        .btn-register-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.45);
+        }
+
+        .reg-error-alert {
+            background: #FEE2E2;
+            border: 1px solid #FCA5A5;
+            color: #DC2626;
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 14px;
+            display: none;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .reg-success-box {
+            background: #ECFDF5;
+            border: 1px solid #6EE7B7;
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            display: none;
+        }
+
+        .reg-success-icon {
+            width: 52px;
+            height: 52px;
+            background: #10B981;
+            color: #FFFFFF;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin: 0 auto 12px;
+        }
+
+        .reg-footer {
+            margin-top: 16px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748B;
+        }
+
+        .reg-footer a {
+            color: #FF6B35;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .reg-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="register-page">
+    <div class="register-card">
+        <div class="reg-brand-header">
+            <img src="/static/images/logo.png" alt="Vertex Construction & PCCC" class="reg-logo-img" onerror="this.src='/static/images/logo.svg'">
+            <div class="reg-tagline">Đăng Ký Tài Khoản Báo Giá PCCC &amp; Cơ Điện</div>
+        </div>
+
+        <div class="approval-notice-banner">
+            <i class="fa-solid fa-user-shield"></i>
+            <div>
+                <b>Chính sách kiểm soát nội bộ:</b> Tài khoản sau khi đăng ký sẽ ở trạng thái <b>Chờ Duyệt (Pending)</b>. Quản trị viên (Sếp Tiến) sẽ kiểm tra và kích hoạt trước khi bạn có thể đăng nhập.
+            </div>
+        </div>
+
+        <div id="reg-error" class="reg-error-alert">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="reg-error-msg"></span>
+        </div>
+
+        <!-- Success Message Screen -->
+        <div id="reg-success" class="reg-success-box">
+            <div class="reg-success-icon">
+                <i class="fa-solid fa-check"></i>
+            </div>
+            <h3 style="color: #065F46; font-size: 16px; margin-bottom: 8px;">Đăng Ký Thành Công!</h3>
+            <p style="color: #047857; font-size: 13px; line-height: 1.5; margin-bottom: 16px;">
+                Tài khoản <b id="success-user-name"></b> của bạn đã được lưu vào hệ thống và đang ở trạng thái <b>CHỜ DUYỆT (Pending)</b>.<br>
+                Vui lòng liên hệ Ban Giám Đốc (Sếp Tiến) để phê duyệt kích hoạt trước khi đăng nhập.
+            </p>
+            <a href="/login" class="btn-register-submit" style="text-decoration: none;">
+                <i class="fa-solid fa-arrow-left"></i> QUAY LẠI TRANG ĐĂNG NHẬP
+            </a>
+        </div>
+
+        <form id="register-form">
+            <div class="form-grid-2">
+                <div class="reg-form-group">
+                    <label><i class="fa-solid fa-user-tag"></i> Tên Đăng Nhập <span style="color:#EF4444;">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-at"></i>
+                        <input type="text" id="reg-username" required placeholder="VD: daily_namha" autocomplete="username">
+                    </div>
+                </div>
+
+                <div class="reg-form-group">
+                    <label><i class="fa-solid fa-user"></i> Họ Và Tên <span style="color:#EF4444;">*</span></label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-signature"></i>
+                        <input type="text" id="reg-fullname" required placeholder="VD: Nguyễn Văn Nam">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="reg-form-group">
+                    <label><i class="fa-solid fa-envelope"></i> Email Công Việc</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-envelope-open"></i>
+                        <input type="email" id="reg-email" placeholder="email@company.com">
+                    </div>
+                </div>
+
+                <div class="reg-form-group">
+                    <label><i class="fa-solid fa-phone"></i> Số Điện Thoại / Zalo</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-phone"></i>
+                        <input type="text" id="reg-phone" placeholder="0988.123.456">
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="reg-form-group">
+                    <label><i class="fa-solid fa-building"></i> Công Ty / Đơn Vị</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-building-flag"></i>
+                        <input type="text" id="reg-company" placeholder="Công ty CP Thiết Bị PCCC...">
+                    </div>
+                </div>
+
+                <div class="reg-form-group">
+                    <label><i class="fa-solid fa-briefcase"></i> Loại Tài Khoản Đăng Ký</label>
+                    <div class="input-wrap">
+                        <i class="fa-solid fa-id-card"></i>
+                        <select id="reg-account-type">
+                            <option value="STAFF">Kỹ sư Bóc tách / Sales Nội Bộ</option>
+                            <option value="DEALER" selected>Đại Lý Phân Phối Thiết Bị PCCC</option>
+                            <option value="PARTNER">Nhà Thầu Thi Công MEP &amp; PCCC</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="reg-form-group">
+                <label><i class="fa-solid fa-lock"></i> Mật Khẩu (Tối thiểu 6 ký tự) <span style="color:#EF4444;">*</span></label>
+                <div class="input-wrap">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" id="reg-password" required placeholder="Nhập mật khẩu bảo mật" minlength="6" autocomplete="new-password">
+                </div>
+            </div>
+
+            <button type="submit" id="btn-register" class="btn-register-submit">
+                <i class="fa-solid fa-paper-plane"></i> GỬI YÊU CẦU ĐĂNG KÝ TÀI KHOẢN
+            </button>
+        </form>
+
+        <div class="reg-footer" id="reg-footer-link">
+            Đã có tài khoản được cấp? <a href="/login"><i class="fa-solid fa-right-to-bracket"></i> Đăng nhập tại đây</a>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errBox = document.getElementById('reg-error');
+            const errMsg = document.getElementById('reg-error-msg');
+            const successBox = document.getElementById('reg-success');
+            const form = document.getElementById('register-form');
+            const footerLink = document.getElementById('reg-footer-link');
+            const btn = document.getElementById('btn-register');
+
+            errBox.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Gửi Yêu Cầu...';
+
+            const usernameVal = document.getElementById('reg-username').value.trim();
+
+            try {
+                const resp = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: usernameVal,
+                        full_name: document.getElementById('reg-fullname').value.trim(),
+                        email: document.getElementById('reg-email').value.trim(),
+                        phone: document.getElementById('reg-phone').value.trim(),
+                        company_name: document.getElementById('reg-company').value.trim(),
+                        account_type: document.getElementById('reg-account-type').value,
+                        password: document.getElementById('reg-password').value
+                    })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Đăng ký không thành công');
+                }
+
+                // Show Success Screen
+                form.style.display = 'none';
+                footerLink.style.display = 'none';
+                document.getElementById('success-user-name').textContent = usernameVal;
+                successBox.style.display = 'block';
+
+            } catch (err) {
+                errMsg.textContent = err.message;
+                errBox.style.display = 'flex';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-paper-plane"></i> GỬI YÊU CẦU ĐĂNG KÝ TÀI KHOẢN';
+            }
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Đăng Nhập Bảo Mật - VERTEX CONSTRUCTION & PCCC</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="alternate icon" href="/static/images/logo-icon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 25%, #222C42 0%, #141A29 70%, #0D121D 100%);
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-page::before {
+            content: '';
+            position: absolute;
+            width: 500px;
+            height: 500px;
+            background: radial-gradient(circle, rgba(255, 107, 53, 0.18) 0%, rgba(255, 107, 53, 0) 70%);
+            top: -120px;
+            right: -120px;
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .login-card {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 18px;
+            max-width: 440px;
+            width: 100%;
+            padding: 36px 32px;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 10;
+        }
+
+        .login-brand-header {
+            text-align: center;
+            margin-bottom: 24px;
+        }
+
+        .login-logo-img {
+            max-height: 58px;
+            width: auto;
+            margin: 0 auto 12px;
+            display: block;
+        }
+
+        .login-tagline {
+            font-size: 11.5px;
+            color: #64748B;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .security-badge-top {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            color: #475569;
+            padding: 4px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 700;
+            margin-top: 6px;
+        }
+
+        .login-form-group {
+            margin-bottom: 16px;
+        }
+
+        .login-form-group label {
+            display: block;
+            font-size: 12px;
+            font-weight: 700;
+            color: #334155;
+            margin-bottom: 5px;
+        }
+
+        .input-icon-wrap {
+            position: relative;
+        }
+
+        .input-icon-wrap i {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #94A3B8;
+            font-size: 13px;
+        }
+
+        .input-icon-wrap input {
+            width: 100%;
+            padding: 10px 12px 10px 36px;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            border-radius: 8px;
+            color: #0F172A;
+            font-size: 13.5px;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+
+        .input-icon-wrap input:focus {
+            outline: none;
+            border-color: #FF6B35;
+            box-shadow: 0 0 0 3px rgba(255, 107, 53, 0.2);
+            background: #FFFFFF;
+        }
+
+        .btn-login-submit {
+            width: 100%;
+            padding: 12px;
+            background: linear-gradient(135deg, #FF6B35 0%, #F77F00 100%);
+            border: none;
+            border-radius: 8px;
+            color: #FFFFFF;
+            font-size: 14px;
+            font-weight: 800;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 4px 14px rgba(255, 107, 53, 0.35);
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+
+        .btn-login-submit:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(255, 107, 53, 0.45);
+        }
+
+        .login-error-alert {
+            background: #FEE2E2;
+            border: 1px solid #FCA5A5;
+            color: #DC2626;
+            padding: 10px 12px;
+            border-radius: 8px;
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+            line-height: 1.4;
+        }
+
+        .login-notice-box {
+            margin-top: 20px;
+            padding: 12px;
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 8px;
+            font-size: 11.5px;
+            color: #475569;
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .login-notice-box i {
+            color: #FF6B35;
+            font-size: 14px;
+            margin-top: 2px;
+            flex-shrink: 0;
+        }
+
+        .login-footer {
+            margin-top: 18px;
+            text-align: center;
+            font-size: 11.5px;
+            color: #64748B;
+        }
+
+        .login-footer a {
+            color: #FF6B35;
+            font-weight: 700;
+            text-decoration: none;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body class="login-page">
+    <div class="login-card">
+        <div class="login-brand-header">
+            <img src="/static/images/logo.png" alt="Vertex Construction & PCCC Logo" class="login-logo-img" onerror="this.src='/static/images/logo.svg'">
+            <div class="login-tagline">Hệ Thống Tự Động Hóa Báo Giá PCCC &amp; Cơ Điện</div>
+            <div class="security-badge-top">
+                <i class="fa-solid fa-shield-halved" style="color:#10B981;"></i>
+                <span>Cổng Đăng Nhập Bảo Mật Nội Bộ</span>
+            </div>
+        </div>
+
+        <div id="login-error" class="login-error-alert">
+            <i class="fa-solid fa-circle-exclamation" style="flex-shrink: 0;"></i>
+            <span id="error-message"></span>
+        </div>
+
+        <form id="login-form">
+            <div class="login-form-group">
+                <label><i class="fa-solid fa-user"></i> Tên Đăng Nhập</label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-user-tag"></i>
+                    <input type="text" id="username" name="username" placeholder="Nhập tên đăng nhập được cấp" required autocomplete="username" autofocus>
+                </div>
+            </div>
+
+            <div class="login-form-group">
+                <label><i class="fa-solid fa-lock"></i> Mật Khẩu</label>
+                <div class="input-icon-wrap">
+                    <i class="fa-solid fa-key"></i>
+                    <input type="password" id="password" name="password" placeholder="Nhập mật khẩu" required autocomplete="current-password">
+                </div>
+            </div>
+
+            <button type="submit" id="btn-login" class="btn-login-submit">
+                <i class="fa-solid fa-right-to-bracket"></i> ĐĂNG NHẬP HỆ THỐNG
+            </button>
+        </form>
+
+        <div class="login-notice-box">
+            <i class="fa-solid fa-circle-info"></i>
+            <div>
+                <b>Lưu ý bảo mật:</b> Dữ liệu đơn giá và bóc tách BOQ là tài sản nội bộ của Vertex. Vui lòng bảo mật thông tin tài khoản và không chia sẻ cho bên thứ ba.
+            </div>
+        </div>
+
+        <div class="login-footer">
+            Chưa có tài khoản? <a href="/register"><i class="fa-solid fa-user-plus"></i> Gửi yêu cầu đăng ký (Chờ duyệt)</a><br>
+            <span style="font-size:10.5px; color:#94A3B8; margin-top:6px; display:inline-block;">Xác thực bảo mật JWT &amp; PBKDF2-SHA256 • Vertex Construction &amp; PCCC</span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const errBox = document.getElementById('login-error');
+            const errMsg = document.getElementById('error-message');
+            const btn = document.getElementById('btn-login');
+            
+            errBox.style.display = 'none';
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Đang Xác Thực...';
+
+            try {
+                const resp = await fetch('/api/auth/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        username: document.getElementById('username').value.trim(),
+                        password: document.getElementById('password').value
+                    })
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(data.detail || 'Đăng nhập không thành công');
+                }
+
+                window.location.href = '/';
+
+            } catch (err) {
+                errMsg.textContent = err.message;
+                errBox.style.display = 'flex';
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fa-solid fa-right-to-bracket"></i> ĐĂNG NHẬP HỆ THỐNG';
+            }
+        });
+    </script>
+</body>
+</html>

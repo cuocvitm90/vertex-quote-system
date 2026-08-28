@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 100" width="100%" height="100%">
+  <defs>
+    <linearGradient id="wOrangeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FF7D47" />
+      <stop offset="100%" stop-color="#E8590C" />
+    </linearGradient>
+    <linearGradient id="wNavyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+    <filter id="subtleGlow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="2" stdDeviation="3" flood-color="#FF6B35" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <g transform="translate(10, 8)" filter="url(#subtleGlow)">
+    <path d="M 6 82 L 6 36 L 24 22 L 24 82 Z" fill="url(#wOrangeGrad)" />
+    <line x1="12" y1="36" x2="18" y2="32" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <line x1="12" y1="48" x2="18" y2="44" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <line x1="12" y1="60" x2="18" y2="56" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <line x1="12" y1="72" x2="18" y2="68" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+    <path d="M 28 82 L 28 10 L 52 2 L 52 82 Z" fill="#1B2234" stroke="#FF6B35" stroke-width="1.5" />
+    
+    <rect x="33" y="16" width="6" height="6" rx="1" fill="#FF6B35" />
+    <rect x="43" y="16" width="6" height="6" rx="1" fill="#FFFFFF" />
+    <rect x="33" y="28" width="6" height="6" rx="1" fill="#FFFFFF" />
+    <rect x="43" y="28" width="6" height="6" rx="1" fill="#FF6B35" />
+    <rect x="33" y="40" width="6" height="6" rx="1" fill="#FFFFFF" />
+    <rect x="43" y="40" width="6" height="6" rx="1" fill="#FFFFFF" />
+    <rect x="33" y="52" width="6" height="6" rx="1" fill="#FF6B35" />
+    <rect x="43" y="52" width="6" height="6" rx="1" fill="#FFFFFF" />
+    <rect x="33" y="64" width="6" height="6" rx="1" fill="#FFFFFF" />
+    <rect x="43" y="64" width="6" height="6" rx="1" fill="#FF6B35" />
+
+    <path d="M 56 82 L 56 22 L 74 36 L 74 82 Z" fill="url(#wOrangeGrad)" />
+    <line x1="62" y1="32" x2="68" y2="36" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <line x1="62" y1="44" x2="68" y2="48" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <line x1="62" y1="56" x2="68" y2="60" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+    <line x1="62" y1="68" x2="68" y2="72" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" opacity="0.6"/>
+
+    <rect x="2" y="82" width="76" height="4" rx="2" fill="#FF6B35" />
+  </g>
+
+  <g transform="translate(98, 12)">
+    <text x="0" y="40" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="36" font-weight="900" fill="#FFFFFF" letter-spacing="1.5">VERTEX</text>
+    <text x="2" y="65" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="16" font-weight="800" fill="#FF6B35" letter-spacing="4.5">CONSTRUCTION</text>
+    <text x="3" y="78" font-family="'Plus Jakarta Sans', 'Segoe UI', Arial, sans-serif" font-size="8.5" font-weight="600" fill="#94A3B8" letter-spacing="1.2">HVAC &amp; MEP QUOTE AUTOMATION</text>
+  </g>
+</svg>
