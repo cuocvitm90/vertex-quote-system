@@ -271,16 +271,29 @@
             try {
                 const resp = await fetch('/api/auth/login', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({
                         username: document.getElementById('username').value.trim(),
                         password: document.getElementById('password').value
                     })
                 });
 
-                const data = await resp.json();
+                let data = null;
+                const contentType = resp.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    try {
+                        data = await resp.json();
+                    } catch (e) {
+                        data = null;
+                    }
+                }
+
                 if (!resp.ok) {
-                    throw new Error(data.detail || 'Đăng nhập không thành công');
+                    const detail = data && data.detail ? data.detail : `Lỗi đăng nhập (${resp.status}): Thông tin đăng nhập không hợp lệ hoặc tài khoản chưa kích hoạt.`;
+                    throw new Error(detail);
                 }
 
                 window.location.href = '/';

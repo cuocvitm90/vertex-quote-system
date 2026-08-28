@@ -63,6 +63,9 @@ async def register_page(
 
 
 @router.post("/api/auth/register")
+@router.post("/api/register")
+@router.post("/auth/register")
+@router.post("/register")
 async def api_register(
     payload: UserRegisterRequest
 ):
@@ -151,6 +154,9 @@ async def api_register(
 
 
 @router.post("/api/auth/login", response_model=TokenResponse)
+@router.post("/api/login", response_model=TokenResponse)
+@router.post("/auth/login", response_model=TokenResponse)
+@router.post("/login", response_model=TokenResponse)
 async def api_login(
     response: Response,
     payload: UserLoginRequest

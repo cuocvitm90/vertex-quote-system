@@ -9,7 +9,8 @@ import sys
 from pathlib import Path
 from typing import Optional
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Request, Depends, status
+from fastapi import FastAPI, Request, Depends, status, HTTPException
+from starlette.exceptions import HTTPException as StarletteHTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -101,9 +102,26 @@ app.include_router(templates_router)
 app.include_router(cad_takeoff_router)
 app.include_router(field_reports_router)
 
+# Ensure all API 404 / 500 / Validation errors return valid JSON (avoids client syntax errors)
+@app.exception_handler(StarletteHTTPException)
+async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
+    return JSONResponse(
+        status_code=exc.status_code,
+        content={"detail": exc.detail or "Not Found"}
+    )
 
+@app.exception_handler(Exception)
+async def custom_general_exception_handler(request: Request, exc: Exception):
+    if request.url.path.startswith("/api/"):
+        return JSONResponse(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            content={"detail": f"Lỗi hệ thống: {str(exc)}"}
+        )
+    return JSONResponse(
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        content={"detail": "Internal Server Error"}
+    )
 
-# Healthcheck Endpoints for Cloud Services (Render, Docker, Kubernetes)
 @app.get("/api/health")
 @app.get("/health")
 @app.get("/healthz")

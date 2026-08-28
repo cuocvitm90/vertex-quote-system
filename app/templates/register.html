@@ -354,7 +354,10 @@
             try {
                 const resp = await fetch('/api/auth/register', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
                     body: JSON.stringify({
                         username: usernameVal,
                         full_name: document.getElementById('reg-fullname').value.trim(),
@@ -366,9 +369,19 @@
                     })
                 });
 
-                const data = await resp.json();
+                let data = null;
+                const contentType = resp.headers.get('content-type') || '';
+                if (contentType.includes('application/json')) {
+                    try {
+                        data = await resp.json();
+                    } catch (e) {
+                        data = null;
+                    }
+                }
+
                 if (!resp.ok) {
-                    throw new Error(data.detail || 'Đăng ký không thành công');
+                    const detail = data && data.detail ? data.detail : `Lỗi đăng ký (${resp.status}): Không thể hoàn tất yêu cầu đăng ký.`;
+                    throw new Error(detail);
                 }
 
                 // Show Success Screen
