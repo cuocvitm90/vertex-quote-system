@@ -12,7 +12,7 @@
     <!-- Leaflet Interactive Maps CSS & JS (Ultra lightweight & reliable) -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="/static/css/style.css?v=3.5.0">
     <style>
         /* Specific Styles for Field Reports & GPS Attendance */
         .field-grid {
@@ -252,73 +252,71 @@
     </style>
 </head>
 <body>
-    <!-- Top Header -->
-    <header class="app-header">
-        <div class="header-container">
-            <!-- Left: Brand Logo -->
-            <div class="header-left">
-                <a href="/" class="brand-block" title="Vertex Construction & PCCC Automation Engine">
-                    <img src="/static/images/logo-white.svg" alt="VERTEX" class="brand-logo-img" onerror="this.src='/static/images/logo-white.png'">
-                </a>
+    <!-- Top Navigation Header (STYLE 3: Dark Glassmorphism Trong Suốt) -->
+    <header class="vertex-header">
+        <!-- Left: Brand Logo -->
+        <div class="vertex-brand">
+            <a href="/" class="brand-block" title="Vertex Construction & PCCC Automation Engine">
+                <img src="/static/images/logo-white.svg" alt="VERTEX" class="brand-logo-img" onerror="this.src='/static/images/logo-white.png'">
+            </a>
+        </div>
+
+        <!-- Center: Standardized SaaS Navigation Toolbar -->
+        <nav class="vertex-navigation">
+            <!-- Multi-language Select Dropdown -->
+            <div class="vertex-lang-wrap" title="Chọn ngôn ngữ hiển thị">
+                <select id="language-switcher" class="vertex-lang-select" onchange="setLanguage(this.value)">
+                    <option value="vi">🇻🇳 Tiếng Việt</option>
+                    <option value="en">🇬🇧 English</option>
+                    <option value="zh">🇨🇳 简体中文</option>
+                    <option value="ko">🇰🇷 한국어</option>
+                </select>
             </div>
 
-            <!-- Center: Standardized SaaS Navigation Toolbar -->
-            <nav class="header-nav-toolbar">
-                <!-- Multi-language Select Dropdown -->
-                <div class="lang-selector-wrapper" title="Chọn ngôn ngữ hiển thị">
-                    <select id="language-switcher" class="lang-select" onchange="setLanguage(this.value)">
-                        <option value="vi">🇻🇳 Tiếng Việt</option>
-                        <option value="en">🇬🇧 English</option>
-                        <option value="zh">🇨🇳 简体中文</option>
-                        <option value="ko">🇰🇷 한국어</option>
-                    </select>
-                </div>
+            <a href="/" class="vertex-nav-item" data-module="overview" title="Tổng quan các gói báo giá">
+                <i class="fa-solid fa-table-list"></i>
+                <span class="vertex-nav-label">Tổng Báo Giá</span>
+            </a>
 
-                <a href="/" class="nav-item-card" data-module="overview" title="Tổng quan các gói báo giá">
-                    <i class="fa-solid fa-table-list"></i>
-                    <span class="card-label">Tổng Báo Giá</span>
-                </a>
+            <a href="/inventory" class="vertex-nav-item" data-module="inventory" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                <i class="fa-solid fa-boxes-stacked"></i>
+                <span class="vertex-nav-label">Kho &amp; BOM</span>
+            </a>
 
-                <a href="/inventory" class="nav-item-card" data-module="inventory" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
-                    <i class="fa-solid fa-boxes-stacked"></i>
-                    <span class="card-label">Kho &amp; BOM</span>
-                </a>
+            <a href="/quote-builder" class="vertex-nav-item" data-module="builder" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                <i class="fa-solid fa-file-signature"></i>
+                <span class="vertex-nav-label">Lập Báo Giá</span>
+            </a>
 
-                <a href="/quote-builder" class="nav-item-card" data-module="builder" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
-                    <i class="fa-solid fa-file-signature"></i>
-                    <span class="card-label">Lập Báo Giá</span>
-                </a>
+            <a href="/cad-takeoff" class="vertex-nav-item" data-module="cad" title="Bóc tách bản vẽ CAD/BIM">
+                <i class="fa-solid fa-layer-group"></i>
+                <span class="vertex-nav-label">Bóc Tách CAD</span>
+            </a>
 
-                <a href="/cad-takeoff" class="nav-item-card" data-module="cad" title="Bóc tách bản vẽ CAD/BIM">
-                    <i class="fa-solid fa-layer-group"></i>
-                    <span class="card-label">Bóc Tách CAD</span>
-                </a>
+            <a href="/field-reports" class="vertex-nav-item active" data-module="field" title="Chấm công GPS & Hiện trường">
+                <i class="fa-solid fa-location-dot"></i>
+                <span class="vertex-nav-label">Hiện Trường</span>
+            </a>
+        </nav>
 
-                <a href="/field-reports" class="nav-item-card active" data-module="field" title="Chấm công GPS & Hiện trường">
-                    <i class="fa-solid fa-location-dot"></i>
-                    <span class="card-label">Hiện Trường</span>
-                </a>
-            </nav>
-
-            <!-- Right: Protected User Profile Badge & Logout (Safe Pinned Layout) -->
-            <div class="header-right-user">
-                <div class="user-profile-badge" title="Tài khoản đang đăng nhập">
-                    <div class="user-avatar-wrapper">
-                        <div class="user-avatar">
-                            {{ user.full_name[0] if user and user.full_name else 'V' }}
-                        </div>
-                        <span class="status-dot-online" title="Trạng thái: Trực tuyến"></span>
+        <!-- Right: Protected User Profile Badge & Logout (Safe Pinned Layout) -->
+        <div class="vertex-user">
+            <div class="vertex-user-card" title="Tài khoản đang đăng nhập">
+                <div class="vertex-avatar-wrap">
+                    <div class="vertex-avatar">
+                        {{ user.full_name[0] if user and user.full_name else 'V' }}
                     </div>
-                    <div class="user-meta">
-                        <span class="user-name" title="{{ user.full_name if user else 'Người dùng' }}">{{ user.full_name if user else 'Người dùng' }}</span>
-                        <span class="user-role-tag">
-                            <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
-                        </span>
-                    </div>
-                    <a href="/logout" class="btn-logout" title="Đăng xuất tài khoản">
-                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
-                    </a>
+                    <span class="vertex-status-online" title="Trạng thái: Trực tuyến"></span>
                 </div>
+                <div class="vertex-user-info">
+                    <span class="vertex-user-name" title="{{ user.full_name if user else 'Người dùng' }}">{{ user.full_name if user else 'Người dùng' }}</span>
+                    <span class="vertex-user-role">
+                        <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
+                    </span>
+                </div>
+                <a href="/logout" class="vertex-btn-logout" title="Đăng xuất tài khoản">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                </a>
             </div>
         </div>
     </header>
