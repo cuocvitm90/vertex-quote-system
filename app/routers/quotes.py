@@ -40,6 +40,7 @@ def get_sample_file(file_type: str):
 
 
 @router.post("/upload")
+@router.post("/upload/")
 async def upload_boq_and_generate_quote(
     request: Request,
     file: UploadFile = File(..., description="File BOQ Excel (.xlsx, .xls), CAD (.dxf), hoặc PDF"),

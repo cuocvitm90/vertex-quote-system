@@ -249,12 +249,21 @@ function initForm() {
             let data = {};
             try {
                 const rawText = await response.text();
-                data = rawText ? JSON.parse(rawText) : {};
+                if (rawText && rawText.trim().startsWith('<')) {
+                    data = { detail: `Máy chủ trả về phản hồi HTML (HTTP ${response.status}: ${response.statusText}). Vui lòng kiểm tra lại quyền đăng nhập hoặc đường dẫn API.` };
+                } else {
+                    data = rawText ? JSON.parse(rawText) : {};
+                }
             } catch (jsonErr) {
                 data = { detail: `Lỗi kết nối phản hồi máy chủ (HTTP ${response.status}: ${response.statusText})` };
             }
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    showToast('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại!');
+                    setTimeout(() => window.location.href = '/login', 1200);
+                    return;
+                }
                 throw new Error(data.detail || data.message || `Lỗi máy chủ (${response.status})`);
             }
 

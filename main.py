@@ -128,21 +128,25 @@ async def custom_validation_exception_handler(request: Request, exc: RequestVali
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"status": "error", "detail": exc.detail or "Not Found"}
+        content={
+            "status": "error",
+            "message": exc.detail or "Not Found",
+            "detail": exc.detail or "Not Found"
+        }
     )
 
 @app.exception_handler(Exception)
 async def custom_general_exception_handler(request: Request, exc: Exception):
     import traceback
     print(f"[UNHANDLED EXCEPTION] {traceback.format_exc()}")
-    if request.url.path.startswith("/api/"):
-        return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"status": "error", "detail": f"Lỗi hệ thống: {str(exc)}"}
-        )
+    err_msg = str(exc) or "Internal Server Error"
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"status": "error", "detail": "Internal Server Error"}
+        content={
+            "status": "error",
+            "message": err_msg,
+            "detail": f"Lỗi hệ thống: {err_msg}"
+        }
     )
 
 @app.get("/api/health")
