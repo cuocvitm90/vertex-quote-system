@@ -73,15 +73,17 @@ html, body {
 }
 
 /* --------------------------------------------------
-   Top Header Navigation (Strict Single-Line Flex SaaS Toolbar)
+   Top Header Navigation (STYLE 3: Glassmorphism Trong Suốt)
    -------------------------------------------------- */
 .app-header,
 .header,
 .navbar {
     width: 100%;
     max-width: 100vw;
-    background: #0F172A;
-    border-bottom: 3px solid var(--vertex-orange-main);
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
     color: #FFFFFF;
     padding: 8px 0;
     position: sticky;
@@ -115,7 +117,7 @@ html, body {
 }
 
 .brand-logo-img {
-    height: 36px;
+    height: 38px;
     width: auto;
     object-fit: contain;
     display: block;
@@ -126,13 +128,13 @@ html, body {
 .header-actions {
     display: flex !important;
     align-items: center !important;
-    gap: 6px !important;
+    gap: 8px !important;
     flex: 1 1 auto !important;
     min-width: 0 !important;
     flex-wrap: nowrap !important;
     overflow-x: auto !important;
     white-space: nowrap !important;
-    padding: 2px 0;
+    padding: 4px 2px;
     scrollbar-width: none;
     -ms-overflow-style: none;
 }
@@ -142,63 +144,71 @@ html, body {
     display: none;
 }
 
-/* Uniform Button Class (.nav-btn, .nav-pill-btn, .header-actions .btn) */
+/* Style 3: Two-Line Modern Vertical Card Buttons (.nav-item-card, .nav-btn, .nav-pill-btn) */
+.nav-item-card,
 .nav-btn,
 .nav-pill-btn,
 .header-actions .btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    padding: 6px 12px;
-    height: 32px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 6px;
-    color: #ffffff !important;
-    font-size: 13px;
-    font-weight: 500;
-    font-family: inherit;
-    text-decoration: none;
-    transition: all 0.2s ease;
-    white-space: nowrap;
-    flex-shrink: 0;
-    box-sizing: border-box;
-    line-height: 1;
-    cursor: pointer;
-    user-select: none;
-    margin: 0;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 7px 12px !important;
+    min-width: 82px !important;
+    height: 48px !important;
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+    border-radius: 12px !important;
+    color: #94a3b8 !important;
+    font-size: 11.5px !important;
+    font-weight: 500 !important;
+    font-family: inherit !important;
+    text-decoration: none !important;
+    transition: all 0.25s ease !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-sizing: border-box !important;
+    cursor: pointer !important;
+    user-select: none !important;
+    margin: 0 !important;
+    line-height: 1 !important;
 }
 
+.nav-item-card i,
 .nav-btn i,
 .nav-pill-btn i,
 .header-actions .btn i {
-    font-size: 12.5px;
-    transition: transform 0.2s ease;
+    font-size: 15px !important;
+    transition: transform 0.2s ease !important;
 }
 
+.nav-item-card:hover,
 .nav-btn:hover,
 .nav-pill-btn:hover,
 .header-actions .btn:hover {
-    background: rgba(255, 255, 255, 0.18) !important;
-    border-color: rgba(255, 255, 255, 0.3) !important;
+    background: rgba(255, 255, 255, 0.1) !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
     color: #ffffff !important;
-    transform: translateY(-1px);
+    transform: translateY(-2px) !important;
 }
 
+.nav-item-card:hover i,
 .nav-btn:hover i,
 .nav-pill-btn:hover i,
 .header-actions .btn:hover i {
-    transform: scale(1.1);
+    transform: scale(1.15) !important;
 }
 
+.nav-item-card:active,
 .nav-btn:active,
 .nav-pill-btn:active,
 .header-actions .btn:active {
-    transform: translateY(0) scale(0.97);
+    transform: translateY(0) scale(0.97) !important;
 }
 
 /* Active State: Vibrant Vertex Orange #FF6600 */
+.nav-item-card.active,
 .nav-btn.active,
 .nav-pill-btn.active,
 .header-actions .btn.active,
@@ -207,16 +217,18 @@ html, body {
     background: #FF6600 !important;
     border-color: #FF6600 !important;
     color: #ffffff !important;
-    font-weight: 600;
-    box-shadow: 0 2px 10px rgba(255, 102, 0, 0.45) !important;
+    box-shadow: 0 4px 14px rgba(255, 102, 0, 0.4) !important;
+    font-weight: 600 !important;
 }
 
+.nav-item-card.active i,
 .nav-btn.active i,
 .nav-pill-btn.active i,
 .header-actions .btn.active i {
     color: #ffffff !important;
 }
 
+.nav-item-card.active:hover,
 .nav-btn.active:hover,
 .nav-pill-btn.active:hover,
 .header-actions .btn.active:hover {
@@ -225,47 +237,48 @@ html, body {
 }
 
 /* Toolbar Pill Badges (for counter numbers) */
+.nav-item-card .pill-badge,
 .nav-btn .pill-badge,
 .nav-pill-btn .pill-badge {
-    background: rgba(255, 255, 255, 0.22);
+    background: rgba(255, 255, 255, 0.25);
     color: #FFFFFF;
     padding: 1px 5px;
-    border-radius: 4px;
-    font-size: 10.5px;
-    font-weight: 700;
-    margin-left: 2px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 800;
     line-height: 1;
+    margin-left: 2px;
 }
 
 .pill-badge.badge-warning {
-    background: rgba(251, 191, 36, 0.3) !important;
+    background: rgba(251, 191, 36, 0.35) !important;
     color: #FBBF24 !important;
 }
 
 .pill-badge.badge-success {
-    background: rgba(52, 211, 153, 0.3) !important;
+    background: rgba(52, 211, 153, 0.35) !important;
     color: #34D399 !important;
 }
 
 /* --------------------------------------------------
-   Language Selector Pill
+   Language Selector Pill (Style 3 Glassmorphism)
    -------------------------------------------------- */
 .lang-selector-wrapper {
     position: relative;
     display: inline-flex;
     align-items: center;
-    height: 32px;
+    height: 48px;
     box-sizing: border-box;
     flex-shrink: 0;
 }
 
 .lang-select {
-    height: 32px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    height: 48px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
     color: #FFFFFF !important;
-    padding: 0 20px 0 8px;
-    border-radius: 6px;
+    padding: 0 24px 0 10px;
+    border-radius: 12px;
     font-size: 11.5px;
     font-weight: 600;
     font-family: inherit;
@@ -276,19 +289,18 @@ html, body {
     -moz-appearance: none;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='9' height='9' fill='%23FFFFFF' viewBox='0 0 16 16'%3E%3Cpath d='M7.247 11.14 2.451 5.658C1.885 5.013 2.345 4 3.204 4h9.592a1 1 0 0 1 .753 1.659l-4.796 5.48a1 1 0 0 1-1.506 0z'/%3E%3C/svg%3E");
     background-repeat: no-repeat;
-    background-position: right 6px center;
-    transition: all 0.2s ease;
+    background-position: right 8px center;
+    transition: all 0.25s ease;
     user-select: none;
     box-sizing: border-box;
     display: inline-flex;
     align-items: center;
-    line-height: 30px;
 }
 
 .lang-select:hover,
 .lang-select:focus {
-    background-color: rgba(255, 255, 255, 0.18);
-    border-color: rgba(255, 102, 0, 0.65);
+    background-color: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
     box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.25);
 }
 
@@ -300,64 +312,65 @@ html, body {
 }
 
 /* --------------------------------------------------
-   Right User Profile & Logout Dock (Zero Clipping, Strictly Pinned)
+   Right User Profile & Logout Dock (Style 3 Glassmorphism)
    -------------------------------------------------- */
 .header-right-user {
     display: flex !important;
     align-items: center !important;
     flex-shrink: 0 !important;
     margin-left: auto !important;
-    padding-left: 6px;
+    padding-left: 8px;
     z-index: 2;
 }
 
 .user-profile-badge,
 .user-profile-chip {
-    height: 32px;
+    height: 48px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 0 8px 0 5px;
-    border-radius: 6px;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    padding: 0 10px 0 8px;
+    border-radius: 12px;
     box-sizing: border-box;
     white-space: nowrap;
     flex-shrink: 0;
-    transition: all 0.2s ease;
+    transition: all 0.25s ease;
 }
 
 .user-profile-badge:hover,
 .user-profile-chip:hover {
-    background: rgba(255, 255, 255, 0.14);
-    border-color: rgba(255, 102, 0, 0.4);
+    background: rgba(255, 255, 255, 0.1);
+    border-color: rgba(255, 255, 255, 0.2);
 }
 
 .user-avatar {
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
     background: #FF6600;
     display: flex;
     align-items: center;
     justify-content: center;
     color: #FFFFFF;
-    font-size: 11px;
+    font-size: 12px;
     font-weight: 700;
     flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(255, 102, 0, 0.3);
 }
 
 .user-meta {
     display: flex;
     flex-direction: column;
-    line-height: 1.1;
-    gap: 1px;
-    max-width: 100px;
+    line-height: 1.15;
+    gap: 2px;
+    max-width: 105px;
     overflow: hidden;
 }
 
 .user-name {
-    font-size: 11px;
+    font-size: 11.5px;
     font-weight: 600;
     color: #FFFFFF;
     white-space: nowrap;
@@ -367,7 +380,7 @@ html, body {
 }
 
 .user-role-tag {
-    font-size: 8px;
+    font-size: 8.5px;
     font-weight: 700;
     color: #FF8533;
     text-transform: uppercase;
@@ -375,18 +388,18 @@ html, body {
 }
 
 .btn-logout {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.15);
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
     color: #CBD5E1;
     cursor: pointer;
-    font-size: 11px;
-    width: 22px;
-    height: 22px;
-    border-radius: 4px;
+    font-size: 11.5px;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    margin-left: 2px;
+    margin-left: 4px;
     transition: all 0.2s ease;
     text-decoration: none;
     flex-shrink: 0;
@@ -396,6 +409,7 @@ html, body {
     background: rgba(239, 68, 68, 0.3);
     border-color: #EF4444;
     color: #EF4444;
+    transform: scale(1.08);
 }
 
 /* Navbar Responsive Behavior */
