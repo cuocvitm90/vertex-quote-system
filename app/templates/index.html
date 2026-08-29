@@ -38,75 +38,75 @@
                 </div>
 
                 <!-- 1. Tổng Báo Giá (Active) -->
-                <a href="/" class="nav-item-card active" title="Tổng quan toàn bộ các gói báo giá">
+                <a href="/" class="nav-item-card active" data-module="overview" title="Tổng quan toàn bộ các gói báo giá">
                     <i class="fa-solid fa-table-list"></i>
                     <span class="card-label"><span data-i18n="stat_total">Tổng Báo Giá</span> <span class="pill-badge" id="stat-total">{{ total_quotes or 0 }}</span></span>
                 </a>
 
                 <!-- 2. Chờ Duyệt (ZALO) Quick Filter -->
-                <button type="button" class="nav-item-card" onclick="filterQuotes('PENDING_APPROVAL'); scrollToQuotesTable();" title="Lọc danh sách báo giá đang chờ Trưởng phòng duyệt Zalo">
-                    <i class="fa-solid fa-hourglass-half" style="color:#FBBF24;"></i>
+                <button type="button" class="nav-item-card" data-module="pending" onclick="filterQuotes('PENDING_APPROVAL'); scrollToQuotesTable();" title="Lọc danh sách báo giá đang chờ Trưởng phòng duyệt Zalo">
+                    <i class="fa-solid fa-hourglass-half"></i>
                     <span class="card-label"><span data-i18n="stat_pending">Chờ Duyệt</span> <span class="pill-badge badge-warning" id="stat-pending">0</span></span>
                 </button>
 
                 <!-- 3. Đã Duyệt / Gửi Quick Filter -->
-                <button type="button" class="nav-item-card" onclick="filterQuotes('APPROVED'); scrollToQuotesTable();" title="Lọc danh sách báo giá đã phê duyệt & đã gửi khách hàng">
-                    <i class="fa-solid fa-circle-check" style="color:#34D399;"></i>
+                <button type="button" class="nav-item-card" data-module="approved" onclick="filterQuotes('APPROVED'); scrollToQuotesTable();" title="Lọc danh sách báo giá đã phê duyệt & đã gửi khách hàng">
+                    <i class="fa-solid fa-circle-check"></i>
                     <span class="card-label"><span data-i18n="stat_approved">Đã Duyệt</span> <span class="pill-badge badge-success" id="stat-approved">0</span></span>
                 </button>
 
                 <!-- 4. Kho & BOM -->
-                <a href="/inventory" class="nav-item-card" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
-                    <i class="fa-solid fa-boxes-stacked" style="color:#F59E0B;"></i>
+                <a href="/inventory" class="nav-item-card" data-module="inventory" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked"></i>
                     <span class="card-label">Kho &amp; BOM</span>
                 </a>
 
                 <!-- 5. Lập Báo Giá -->
-                <a href="/quote-builder" class="nav-item-card" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
-                    <i class="fa-solid fa-file-signature" style="color:#FF8533;"></i>
+                <a href="/quote-builder" class="nav-item-card" data-module="builder" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature"></i>
                     <span class="card-label">Lập Báo Giá</span>
                 </a>
 
                 <!-- 6. File Mẫu & Hệ Số -->
-                <button type="button" class="nav-item-card" onclick="openMasterTemplateModal()" title="Quản lý File Mẫu Chuẩn & Khung Tỷ Lệ Định Mức">
-                    <i class="fa-solid fa-file-invoice" style="color:#F472B6;"></i>
+                <button type="button" class="nav-item-card" data-module="templates" onclick="openMasterTemplateModal()" title="Quản lý File Mẫu Chuẩn & Khung Tỷ Lệ Định Mức">
+                    <i class="fa-solid fa-file-invoice"></i>
                     <span class="card-label">File Mẫu</span>
                 </button>
 
                 <!-- 7. Hướng Dẫn -->
-                <button type="button" class="nav-item-card" onclick="openUserGuideModal()" title="Hướng dẫn sử dụng quy trình báo giá 4 bước Vertex">
-                    <i class="fa-solid fa-book-open" style="color:#60A5FA;"></i>
+                <button type="button" class="nav-item-card" data-module="guide" onclick="openUserGuideModal()" title="Hướng dẫn sử dụng quy trình báo giá 4 bước Vertex">
+                    <i class="fa-solid fa-book-open"></i>
                     <span class="card-label" data-i18n="nav_user_guide">Hướng Dẫn</span>
                 </button>
 
                 <!-- 8. Bóc Tách CAD/Revit -->
-                <a href="/cad-takeoff" class="nav-item-card" title="Bóc tách khối lượng từ bản vẽ CAD (.dxf, .dwg) & Revit BIM">
-                    <i class="fa-solid fa-layer-group" style="color:#A78BFA;"></i>
+                <a href="/cad-takeoff" class="nav-item-card" data-module="cad" title="Bóc tách khối lượng từ bản vẽ CAD (.dxf, .dwg) & Revit BIM">
+                    <i class="fa-solid fa-layer-group"></i>
                     <span class="card-label" data-i18n="nav_cad_takeoff">Bóc Tách CAD</span>
                 </a>
 
                 <!-- 9. Chấm Công & Báo Cáo -->
-                <a href="/field-reports" class="nav-item-card" title="Chấm công GPS & Quản lý báo cáo công việc hiện trường">
-                    <i class="fa-solid fa-location-dot" style="color:#34D399;"></i>
+                <a href="/field-reports" class="nav-item-card" data-module="field" title="Chấm công GPS & Quản lý báo cáo công việc hiện trường">
+                    <i class="fa-solid fa-location-dot"></i>
                     <span class="card-label" data-i18n="nav_field_report">Hiện Trường</span>
                 </a>
 
                 <!-- 10. Quản Trị User (RBAC) -->
                 {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
-                <button type="button" class="nav-item-card" onclick="openUserManagementModal()" title="Quản trị người dùng & Phân quyền">
-                    <i class="fa-solid fa-users-gear" style="color:#FBBF24;"></i>
+                <button type="button" class="nav-item-card" data-module="users" onclick="openUserManagementModal()" title="Quản trị người dùng & Phân quyền">
+                    <i class="fa-solid fa-users-gear"></i>
                     <span class="card-label" data-i18n="nav_user_mgmt">Quản Trị</span>
                 </button>
                 {% endif %}
 
                 <!-- 11. API Docs -->
-                <a href="/docs" target="_blank" class="nav-item-card" title="Tài liệu API Swagger">
-                    <i class="fa-solid fa-code" style="color:#94A3B8;"></i>
+                <a href="/docs" target="_blank" class="nav-item-card" data-module="docs" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code"></i>
                     <span class="card-label" data-i18n="nav_api_docs">API Docs</span>
                 </a>
 
                 <!-- 12. Tạo Báo Giá Mới (Accent Action) -->
-                <button type="button" class="nav-item-card active" onclick="scrollToUpload()" title="Tạo gói báo giá mới">
+                <button type="button" class="nav-item-card btn-create-quote" onclick="scrollToUpload()" title="Tạo gói báo giá mới">
                     <i class="fa-solid fa-plus"></i>
                     <span class="card-label" data-i18n="nav_create_quote">Tạo Báo Giá</span>
                 </button>
@@ -115,8 +115,11 @@
             <!-- Right: Protected User Profile Badge & Logout (Safe Pinned Layout) -->
             <div class="header-right-user">
                 <div class="user-profile-badge" title="Tài khoản đang đăng nhập">
-                    <div class="user-avatar">
-                        {{ user.full_name[0] if user and user.full_name else 'V' }}
+                    <div class="user-avatar-wrapper">
+                        <div class="user-avatar">
+                            {{ user.full_name[0] if user and user.full_name else 'V' }}
+                        </div>
+                        <span class="status-dot-online" title="Trạng thái: Trực tuyến"></span>
                     </div>
                     <div class="user-meta">
                         <span class="user-name" title="{{ user.full_name if user else 'Người dùng' }}">{{ user.full_name if user else 'Người dùng' }}</span>

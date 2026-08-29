@@ -274,27 +274,27 @@
                     </select>
                 </div>
 
-                <a href="/" class="nav-item-card" title="Tổng quan các gói báo giá">
-                    <i class="fa-solid fa-table-list" style="color:#60A5FA;"></i>
+                <a href="/" class="nav-item-card" data-module="overview" title="Tổng quan các gói báo giá">
+                    <i class="fa-solid fa-table-list"></i>
                     <span class="card-label">Tổng Báo Giá</span>
                 </a>
 
-                <a href="/inventory" class="nav-item-card" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
-                    <i class="fa-solid fa-boxes-stacked" style="color:#F59E0B;"></i>
+                <a href="/inventory" class="nav-item-card" data-module="inventory" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked"></i>
                     <span class="card-label">Kho &amp; BOM</span>
                 </a>
 
-                <a href="/quote-builder" class="nav-item-card" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
-                    <i class="fa-solid fa-file-signature" style="color:#FF8533;"></i>
+                <a href="/quote-builder" class="nav-item-card" data-module="builder" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature"></i>
                     <span class="card-label">Lập Báo Giá</span>
                 </a>
 
-                <a href="/cad-takeoff" class="nav-item-card" title="Bóc tách bản vẽ CAD/BIM">
-                    <i class="fa-solid fa-layer-group" style="color:#A78BFA;"></i>
+                <a href="/cad-takeoff" class="nav-item-card" data-module="cad" title="Bóc tách bản vẽ CAD/BIM">
+                    <i class="fa-solid fa-layer-group"></i>
                     <span class="card-label">Bóc Tách CAD</span>
                 </a>
 
-                <a href="/field-reports" class="nav-item-card active" title="Chấm công GPS & Hiện trường">
+                <a href="/field-reports" class="nav-item-card active" data-module="field" title="Chấm công GPS & Hiện trường">
                     <i class="fa-solid fa-location-dot"></i>
                     <span class="card-label">Hiện Trường</span>
                 </a>
@@ -303,8 +303,11 @@
             <!-- Right: Protected User Profile Badge & Logout (Safe Pinned Layout) -->
             <div class="header-right-user">
                 <div class="user-profile-badge" title="Tài khoản đang đăng nhập">
-                    <div class="user-avatar">
-                        {{ user.full_name[0] if user and user.full_name else 'V' }}
+                    <div class="user-avatar-wrapper">
+                        <div class="user-avatar">
+                            {{ user.full_name[0] if user and user.full_name else 'V' }}
+                        </div>
+                        <span class="status-dot-online" title="Trạng thái: Trực tuyến"></span>
                     </div>
                     <div class="user-meta">
                         <span class="user-name" title="{{ user.full_name if user else 'Người dùng' }}">{{ user.full_name if user else 'Người dùng' }}</span>
