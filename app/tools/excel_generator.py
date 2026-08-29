@@ -303,3 +303,16 @@ class VertexExcelGenerator:
         wb.save(output_path)
         wb.close()
         return output_path
+
+
+def create_standard_excel_quote(quote: Quote, output_dir: Optional[str] = None) -> str:
+    """Helper function to generate quote excel using VertexExcelGenerator"""
+    if output_dir:
+        lang = getattr(quote, "language", "vi") or "vi"
+        filename = f"Bao_Gia_{quote.quote_code}_{quote.customer_name.replace(' ', '_')}_{lang}.xlsx"
+        clean_name = "".join(c for c in filename if c.isalnum() or c in "._-")
+        out_path = str(Path(output_dir) / clean_name)
+    else:
+        out_path = None
+    return VertexExcelGenerator.generate(quote, out_path)
+

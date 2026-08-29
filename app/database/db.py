@@ -15,7 +15,8 @@ from app.config import settings
 from app.database.models import (
     Quote, QuoteItem, PriceCatalogItem, QuoteStatus,
     User, UserRole, UserStatus, UserInDB, MasterTemplate,
-    AttendanceCheckin, FieldDailyReport, AuditLog, GeofenceAlertRecord
+    AttendanceCheckin, FieldDailyReport, AuditLog, GeofenceAlertRecord,
+    InventoryItem, WarehouseType
 )
 
 DB_PATH = Path(settings.STORAGE_DIR) / "vertex_quotes.db"
@@ -34,6 +35,7 @@ class Database:
         self._seed_users()
         self._seed_master_template()
         self._seed_field_data()
+        self._seed_inventory_data()
 
     def _get_connection(self):
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
@@ -257,6 +259,35 @@ class Database:
             )
             """)
             cursor.execute("CREATE INDEX IF NOT EXISTS idx_geofence_alerts_time ON geofence_alerts(created_at)")
+
+            # 9. Inventory Items & Manufacturing BOM Table
+            cursor.execute("""
+            CREATE TABLE IF NOT EXISTS inventory_items (
+                id TEXT PRIMARY KEY,
+                sku TEXT UNIQUE NOT NULL,
+                name TEXT NOT NULL,
+                warehouse_type TEXT NOT NULL DEFAULT 'MANUFACTURING',
+                category TEXT NOT NULL,
+                unit TEXT DEFAULT 'cái',
+                stock_quantity REAL DEFAULT 0,
+                cost_price REAL DEFAULT 0,
+                retail_price REAL DEFAULT 0,
+                dealer_price REAL DEFAULT 0,
+                project_discount_rate REAL DEFAULT 0,
+                is_custom_dimensions INTEGER DEFAULT 0,
+                default_length REAL,
+                default_width REAL,
+                default_thickness REAL,
+                material_type TEXT,
+                bom_data TEXT,
+                spec TEXT,
+                notes TEXT,
+                created_at TEXT,
+                updated_at TEXT
+            )
+            """)
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_inventory_warehouse ON inventory_items(warehouse_type)")
+            cursor.execute("CREATE INDEX IF NOT EXISTS idx_inventory_sku ON inventory_items(sku)")
 
             conn.commit()
 
@@ -676,6 +707,9 @@ class Database:
             if not row:
                 return None
             return self._row_to_quote(row)
+
+    def get_quote_by_id(self, quote_id: str) -> Optional[Quote]:
+        return self.get_quote(quote_id)
 
     def list_quotes(self, limit: int = 50, offset: int = 0) -> List[Quote]:
         with self._get_connection() as conn:
@@ -1162,6 +1196,677 @@ class Database:
             conn.commit()
             return cursor.rowcount > 0
 
+    # -------------------------------------------------------------
+    # Inventory & Manufacturing BOM Methods
+    # -------------------------------------------------------------
+    def _seed_inventory_data(self):
+        """Seeds standard inventory items with 4-tier pricing & BOM data"""
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT COUNT(*) FROM inventory_items")
+            if cursor.fetchone()[0] > 0:
+                return
+
+            seed_items = [
+                # 1. Kho Sản Xuất - Vật tư thô (Raw Materials)
+                InventoryItem(
+                    id="inv-mfg-raw-001",
+                    sku="VTX-MFG-RAW-001",
+                    name="Tôn cuộn mạ kẽm Z12 Hoa Sen (Dày 0.75mm)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Tôn & Kim loại cuộn",
+                    unit="kg",
+                    stock_quantity=15000.0,
+                    cost_price=24500.0,
+                    retail_price=32000.0,
+                    dealer_price=28000.0,
+                    project_discount_rate=5.0,
+                    material_type="THÉP_MẠ_KẼM",
+                    default_thickness=0.75,
+                    spec="Tiêu chuẩn JIS G3302 Z120, độ mạ kẽm 120g/m2",
+                    notes="Vật tư thô chính để gia công ống gió PCCC và vỏ tủ điện"
+                ),
+                InventoryItem(
+                    id="inv-mfg-raw-002",
+                    sku="VTX-MFG-RAW-002",
+                    name="Tấm nhôm hợp kim AL5052-H32 (Dày 3.0mm)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Tấm kim loại tấm cao cấp",
+                    unit="kg",
+                    stock_quantity=8500.0,
+                    cost_price=115000.0,
+                    retail_price=155000.0,
+                    dealer_price=135000.0,
+                    project_discount_rate=6.0,
+                    material_type="NHÔM_AL5052",
+                    default_thickness=3.0,
+                    spec="Hợp kim nhôm Magie AL5052-H32 chịu lực uốn và chống ăn mòn cực cao",
+                    notes="Nguyên liệu chuyên dụng dập tấm ốp bảo vệ gầm pin xe điện VinFast"
+                ),
+                InventoryItem(
+                    id="inv-mfg-raw-003",
+                    sku="VTX-MFG-RAW-003",
+                    name="Vữa cách nhiệt chống cháy Vertex Maku EI",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Vật liệu chống cháy",
+                    unit="kg",
+                    stock_quantity=25000.0,
+                    cost_price=12000.0,
+                    retail_price=18000.0,
+                    dealer_price=15000.0,
+                    project_discount_rate=8.0,
+                    material_type="VỮA_CHỐNG_CHÁY",
+                    spec="Vữa nhẹ gốc khoáng vô cơ chịu nhiệt >1200°C theo QCVN 06:2022/BXD",
+                    notes="Phun bọc cách nhiệt ống gió tiêu chuẩn EI30, EI45, EI60"
+                ),
+                InventoryItem(
+                    id="inv-mfg-raw-004",
+                    sku="VTX-MFG-RAW-004",
+                    name="Bông khoáng Rockwool chống cháy tỷ trọng 100kg/m3",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Vật liệu chống cháy",
+                    unit="m2",
+                    stock_quantity=3200.0,
+                    cost_price=85000.0,
+                    retail_price=125000.0,
+                    dealer_price=105000.0,
+                    project_discount_rate=5.0,
+                    material_type="ROCKWOOL",
+                    default_thickness=50.0,
+                    spec="Dày 50mm, tỷ trọng 100kg/m3, hệ số dẫn nhiệt k=0.034 W/mK",
+                    notes="Cách nhiệt ống gió và tiêu âm phòng máy bơm PCCC"
+                ),
+
+                # 2. Kho Sản Xuất - Tấm ốp bảo vệ gầm pin xe điện VinFast (VinFast EV Battery Skid Plates)
+                InventoryItem(
+                    id="inv-mfg-ev-001",
+                    sku="VTX-MFG-EV-VF8",
+                    name="Tấm ốp bảo vệ gầm pin xe điện VinFast VF8 (Nhôm AL5052 3.0mm dập gân cường lực)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Tấm ốp gầm pin xe điện VinFast",
+                    unit="tấm",
+                    stock_quantity=120.0,
+                    cost_price=4850000.0,
+                    retail_price=7500000.0,
+                    dealer_price=6200000.0,
+                    project_discount_rate=10.0,
+                    is_custom_dimensions=True,
+                    default_length=2150.0,
+                    default_width=1450.0,
+                    default_thickness=3.0,
+                    material_type="NHÔM_AL5052",
+                    bom_data={
+                        "raw_materials": [
+                            {"material_name": "Tấm nhôm AL5052-H32 (3.0mm)", "spec": "Khổ 1500x2200mm", "unit": "kg", "quantity": 25.2, "unit_cost": 115000.0, "total_cost": 2898000.0},
+                            {"material_name": "Bulong Inox 304 M8x35 kèm long đen chống xoay", "spec": "Bộ 24 con", "unit": "bộ", "quantity": 1.0, "unit_cost": 180000.0, "total_cost": 180000.0},
+                            {"material_name": "Sơn tĩnh điện Anodizing đen mờ chống xước", "spec": "Tiêu chuẩn ô tô", "unit": "m2", "quantity": 3.12, "unit_cost": 120000.0, "total_cost": 374400.0}
+                        ],
+                        "scrap_waste_ratio": 0.05,
+                        "scrap_waste_cost": 172620.0,
+                        "labor_cost": 750000.0,
+                        "overhead_cost": 475000.0,
+                        "calculated_cost_price": 4850020.0
+                    },
+                    spec="Thiết kế nguyên khối chuẩn form gầm pin VinFast VF8, lỗ thoáng tản nhiệt CNC, chống va đập đá văng",
+                    notes="Sản phẩm dập định hình cao cấp tại xưởng cơ khí chính xác Vertex"
+                ),
+                InventoryItem(
+                    id="inv-mfg-ev-002",
+                    sku="VTX-MFG-EV-VF9",
+                    name="Tấm ốp bảo vệ gầm pin xe điện VinFast VF9 (Nhôm AL5052 3.5mm dập gân cường lực)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Tấm ốp gầm pin xe điện VinFast",
+                    unit="tấm",
+                    stock_quantity=85.0,
+                    cost_price=5950000.0,
+                    retail_price=9200000.0,
+                    dealer_price=7800000.0,
+                    project_discount_rate=10.0,
+                    is_custom_dimensions=True,
+                    default_length=2400.0,
+                    default_width=1550.0,
+                    default_thickness=3.5,
+                    material_type="NHÔM_AL5052",
+                    bom_data={
+                        "raw_materials": [
+                            {"material_name": "Tấm nhôm AL5052-H32 (3.5mm)", "spec": "Khổ 1600x2500mm", "unit": "kg", "quantity": 35.1, "unit_cost": 115000.0, "total_cost": 4036500.0},
+                            {"material_name": "Phụ kiện gá treo gia cố chịu lực khung gầm", "spec": "Thép mạ kẽm", "unit": "bộ", "quantity": 1.0, "unit_cost": 250000.0, "total_cost": 250000.0}
+                        ],
+                        "scrap_waste_ratio": 0.05,
+                        "scrap_waste_cost": 214325.0,
+                        "labor_cost": 900000.0,
+                        "overhead_cost": 550000.0,
+                        "calculated_cost_price": 5950825.0
+                    },
+                    spec="Form chuẩn xe SUV Full-size VinFast VF9, gia cố bảo vệ cụm pack pin 123kWh",
+                    notes="Chống ngập nước, bảo vệ pin tuyệt đối khỏi cạ gầm"
+                ),
+                InventoryItem(
+                    id="inv-mfg-ev-003",
+                    sku="VTX-MFG-EV-VF5",
+                    name="Tấm ốp bảo vệ gầm pin xe điện VinFast VF5 / VFe34 (Thép mạ kẽm 2.5mm dập sóng)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Tấm ốp gầm pin xe điện VinFast",
+                    unit="tấm",
+                    stock_quantity=160.0,
+                    cost_price=2650000.0,
+                    retail_price=4200000.0,
+                    dealer_price=3500000.0,
+                    project_discount_rate=8.0,
+                    is_custom_dimensions=True,
+                    default_length=1850.0,
+                    default_width=1250.0,
+                    default_thickness=2.5,
+                    material_type="THÉP_MẠ_KẼM",
+                    bom_data={
+                        "raw_materials": [
+                            {"material_name": "Thép tấm mạ kẽm cường độ cao 2.5mm", "spec": "Khổ 1300x1900mm", "unit": "kg", "quantity": 45.4, "unit_cost": 28000.0, "total_cost": 1271200.0},
+                            {"material_name": "Sơn tĩnh điện nhúng chống rỉ 2 mặt", "spec": "Dày 80 micron", "unit": "m2", "quantity": 4.6, "unit_cost": 85000.0, "total_cost": 391000.0}
+                        ],
+                        "scrap_waste_ratio": 0.05,
+                        "scrap_waste_cost": 83110.0,
+                        "labor_cost": 550000.0,
+                        "overhead_cost": 355000.0,
+                        "calculated_cost_price": 2650310.0
+                    },
+                    spec="Dập gân chữ X chịu lực đè 3 tấn, bảo vệ đáy pin xe taxi và gia đình",
+                    notes="Dòng sản phẩm bán chạy nhất cho đại lý và gara dịch vụ"
+                ),
+
+                # 3. Kho Sản Xuất - Ống Gió & Vỏ Tủ Điện PCCC (Manufacturing Ductwork & Enclosures)
+                InventoryItem(
+                    id="inv-mfg-duct-ei30",
+                    sku="VTX-MFG-DUCT-EI30",
+                    name="Ống gió chống cháy EI30 (Tôn 0.75mm + Vữa cách nhiệt Maku)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Ống gió chống cháy EI",
+                    unit="m2",
+                    stock_quantity=500.0,
+                    cost_price=380000.0,
+                    retail_price=560000.0,
+                    dealer_price=480000.0,
+                    project_discount_rate=8.0,
+                    is_custom_dimensions=True,
+                    material_type="THÉP_MẠ_KẼM",
+                    default_thickness=0.75,
+                    bom_data={
+                        "raw_materials": [
+                            {"material_name": "Tôn mạ kẽm 0.75mm", "spec": "Hoa Sen Z12", "unit": "kg", "quantity": 6.8, "unit_cost": 24500.0, "total_cost": 166600.0},
+                            {"material_name": "Vữa Maku EI30", "spec": "Dày 18mm", "unit": "kg", "quantity": 8.5, "unit_cost": 12000.0, "total_cost": 102000.0}
+                        ],
+                        "scrap_waste_ratio": 0.05,
+                        "scrap_waste_cost": 13430.0,
+                        "labor_cost": 65000.0,
+                        "overhead_cost": 33000.0,
+                        "calculated_cost_price": 380030.0
+                    },
+                    spec="Giới hạn chịu lửa EI 30 phút theo QCVN 06:2022/BXD",
+                    notes="Sử dụng cho hệ thống hút khói hành lang và tăng áp cầu thang"
+                ),
+                InventoryItem(
+                    id="inv-mfg-duct-ei60",
+                    sku="VTX-MFG-DUCT-EI60",
+                    name="Ống gió chống cháy EI60 (Tôn 0.95mm + Tấm Magie bọc ngoài)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Ống gió chống cháy EI",
+                    unit="m2",
+                    stock_quantity=420.0,
+                    cost_price=520000.0,
+                    retail_price=780000.0,
+                    dealer_price=660000.0,
+                    project_discount_rate=10.0,
+                    is_custom_dimensions=True,
+                    material_type="THÉP_MẠ_KẼM",
+                    default_thickness=0.95,
+                    spec="Giới hạn chịu lửa EI 60 phút theo QCVN 06:2022/BXD",
+                    notes="Dùng cho trục hút khói tầng hầm và gian thương mại"
+                ),
+                InventoryItem(
+                    id="inv-mfg-duct-ei120",
+                    sku="VTX-MFG-DUCT-EI120",
+                    name="Ống gió chống cháy EI120 (Tôn 1.15mm + Bông gốm Ceramic + Tấm bọc kép)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Ống gió chống cháy EI",
+                    unit="m2",
+                    stock_quantity=280.0,
+                    cost_price=780000.0,
+                    retail_price=1180000.0,
+                    dealer_price=980000.0,
+                    project_discount_rate=12.0,
+                    is_custom_dimensions=True,
+                    material_type="THÉP_MẠ_KẼM",
+                    default_thickness=1.15,
+                    spec="Giới hạn chịu lửa EI 120 phút theo QCVN 06:2022/BXD",
+                    notes="Dùng cho gian lánh nạn và trục kỹ thuật xuyên tầng"
+                ),
+                InventoryItem(
+                    id="inv-mfg-cab-001",
+                    sku="VTX-MFG-CAB-001",
+                    name="Vỏ tủ điện PCCC 1200x800x300mm (Thép 1.5mm sơn tĩnh điện đỏ)",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Vỏ tủ điện & Tủ PCCC",
+                    unit="cái",
+                    stock_quantity=95.0,
+                    cost_price=1250000.0,
+                    retail_price=1950000.0,
+                    dealer_price=1600000.0,
+                    project_discount_rate=8.0,
+                    is_custom_dimensions=True,
+                    default_length=1200.0,
+                    default_width=800.0,
+                    default_thickness=300.0,
+                    material_type="THÉP_MẠ_KẼM",
+                    spec="Thép cán nguội dày 1.5mm, khóa bật tay nắm, gioăng cao su chống bụi IP54",
+                    notes="Tủ điều khiển bơm chữa cháy chính và bơm bù áp"
+                ),
+                InventoryItem(
+                    id="inv-mfg-box-001",
+                    sku="VTX-MFG-BOX-001",
+                    name="Hộp tủ chữa cháy vách tường âm tường 600x500x180mm kèm kính & khóa bật",
+                    warehouse_type=WarehouseType.MANUFACTURING,
+                    category="Vỏ tủ điện & Tủ PCCC",
+                    unit="cái",
+                    stock_quantity=250.0,
+                    cost_price=320000.0,
+                    retail_price=490000.0,
+                    dealer_price=410000.0,
+                    project_discount_rate=6.0,
+                    is_custom_dimensions=False,
+                    spec="Thép sơn tĩnh điện đỏ tiêu chuẩn PCCC, kính in chữ CHỮA CHÁY",
+                    notes="Đựng vừa cuộn vòi D50/D65 và lăng phun chữa cháy"
+                ),
+
+                # 4. Kho Thương Mại & Dự Án (Commercial & Project Warehouse)
+                InventoryItem(
+                    id="inv-com-ext-001",
+                    sku="VTX-COM-EXT-001",
+                    name="Bình chữa cháy bột ABC 4kg Tomoken TMK-VJ-ABC/4kg (Tem kiểm định BCA)",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Bình chữa cháy",
+                    unit="bình",
+                    stock_quantity=450.0,
+                    cost_price=215000.0,
+                    retail_price=340000.0,
+                    dealer_price=275000.0,
+                    project_discount_rate=5.0,
+                    spec="Thương hiệu Tomoken liên doanh Nhật Bản, dán sẵn tem kiểm định PCCC",
+                    notes="Bình chữa cháy phổ thông cho văn phòng, căn hộ và nhà xưởng"
+                ),
+                InventoryItem(
+                    id="inv-com-ext-002",
+                    sku="VTX-COM-EXT-002",
+                    name="Bình chữa cháy bột ABC 8kg Tomoken TMK-VJ-ABC/8kg (Tem kiểm định BCA)",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Bình chữa cháy",
+                    unit="bình",
+                    stock_quantity=320.0,
+                    cost_price=340000.0,
+                    retail_price=520000.0,
+                    dealer_price=420000.0,
+                    project_discount_rate=6.0,
+                    spec="Trọng lượng bột 8kg, hiệu quả dập tắt đám cháy rắn, lỏng, khí",
+                    notes="Trang bị khu vực kho hàng và trạm biến áp"
+                ),
+                InventoryItem(
+                    id="inv-com-ext-003",
+                    sku="VTX-COM-EXT-003",
+                    name="Bình chữa cháy khí CO2 3kg Tomoken TMK-VJ-CO2/3kg",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Bình chữa cháy",
+                    unit="bình",
+                    stock_quantity=180.0,
+                    cost_price=410000.0,
+                    retail_price=620000.0,
+                    dealer_price=510000.0,
+                    project_discount_rate=6.0,
+                    spec="Khí CO2 nguyên chất không để lại cặn, bảo vệ thiết bị điện tử",
+                    notes="Phù hợp phòng máy chủ Server, phòng điện nhẹ"
+                ),
+                InventoryItem(
+                    id="inv-com-ext-004",
+                    sku="VTX-COM-EXT-004",
+                    name="Bình chữa cháy khí CO2 5kg Tomoken TMK-VJ-CO2/5kg",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Bình chữa cháy",
+                    unit="bình",
+                    stock_quantity=140.0,
+                    cost_price=610000.0,
+                    retail_price=890000.0,
+                    dealer_price=740000.0,
+                    project_discount_rate=7.0,
+                    spec="Trọng lượng khí 5kg, vòi phun loa kèn cách điện",
+                    notes="Trang bị phòng máy phát điện và tủ phân phối tổng MSB"
+                ),
+                InventoryItem(
+                    id="inv-com-spk-001",
+                    sku="VTX-COM-SPK-001",
+                    name="Đầu phun Sprinkler quay xuống Tyco TY325 K=5.6 68°C DN15",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Đầu phun Sprinkler",
+                    unit="cái",
+                    stock_quantity=3500.0,
+                    cost_price=68000.0,
+                    retail_price=115000.0,
+                    dealer_price=92000.0,
+                    project_discount_rate=8.0,
+                    spec="Tyco Pendent K5.6, nhiệt độ kích hoạt 68°C (ống thủy tinh đỏ)",
+                    notes="Đầu phun tiêu chuẩn phổ biến nhất trong hệ thống chữa cháy tự động"
+                ),
+                InventoryItem(
+                    id="inv-com-spk-002",
+                    sku="VTX-COM-SPK-002",
+                    name="Đầu phun Sprinkler quay lên Tyco TY315 K=5.6 68°C DN15",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Đầu phun Sprinkler",
+                    unit="cái",
+                    stock_quantity=2100.0,
+                    cost_price=72000.0,
+                    retail_price=120000.0,
+                    dealer_price=95000.0,
+                    project_discount_rate=8.0,
+                    spec="Tyco Upright K5.6, lắp đặt trên trần mở, tầng hầm hoặc nhà xưởng",
+                    notes="Bảo vệ không gian trần mở không đóng thạch cao"
+                ),
+                InventoryItem(
+                    id="inv-com-vlv-001",
+                    sku="VTX-COM-VLV-001",
+                    name="Van bướm tín hiệu điện kèm công tắc giám sát DN100 ARV Malaysia",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Van & Thiết bị đường ống PCCC",
+                    unit="cái",
+                    stock_quantity=45.0,
+                    cost_price=1850000.0,
+                    retail_price=2750000.0,
+                    dealer_price=2250000.0,
+                    project_discount_rate=8.0,
+                    spec="Thân gang cầu, đĩa inox 304, tín hiệu tiếp điểm khô NO/NC truyền về tủ báo cháy",
+                    notes="Lắp đặt trên các nhánh cấp nước chữa cháy từng tầng"
+                ),
+                InventoryItem(
+                    id="inv-com-vlv-002",
+                    sku="VTX-COM-VLV-002",
+                    name="Van báo động Alarm Valve DN100 kèm chuông nước & công tắc áp lực ARV",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Van & Thiết bị đường ống PCCC",
+                    unit="bộ",
+                    stock_quantity=22.0,
+                    cost_price=4650000.0,
+                    retail_price=6850000.0,
+                    dealer_price=5600000.0,
+                    project_discount_rate=10.0,
+                    spec="Cụm van báo động Sprinkler trọn bộ: Thân van, chuông cơ, đồng hồ áp, switch áp lực",
+                    notes="Cụm van điều khiển trung tâm hệ thống Sprinkler"
+                ),
+                InventoryItem(
+                    id="inv-com-alm-001",
+                    sku="VTX-COM-ALM-001",
+                    name="Tủ trung tâm báo cháy địa chỉ 1 Loop Hochiki FireNET Plus 1127",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Hệ thống báo cháy địa chỉ",
+                    unit="bộ",
+                    stock_quantity=15.0,
+                    cost_price=1850000.0,
+                    retail_price=26500000.0,
+                    dealer_price=22000000.0,
+                    project_discount_rate=12.0,
+                    spec="1 Loop mở rộng lên 2 Loop, quản lý tới 127 đầu báo + 127 module địa chỉ",
+                    notes="Trung tâm điều khiển báo cháy cao cấp Hochiki Mỹ/Nhật"
+                ),
+                InventoryItem(
+                    id="inv-com-alm-002",
+                    sku="VTX-COM-ALM-002",
+                    name="Đầu báo khói quang địa chỉ Hochiki ALN-V kèm đế YBN-NSA-4",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Hệ thống báo cháy địa chỉ",
+                    unit="cái",
+                    stock_quantity=680.0,
+                    cost_price=380000.0,
+                    retail_price=560000.0,
+                    dealer_price=460000.0,
+                    project_discount_rate=8.0,
+                    spec="Cảm biến quang học buồng khói thế hệ mới, tự động bù bụi bẩn",
+                    notes="Đầu báo địa chỉ chính xác vị trí phát sinh sự cố cháy"
+                ),
+                InventoryItem(
+                    id="inv-com-lgt-001",
+                    sku="VTX-COM-LGT-001",
+                    name="Đèn Exit thoát hiểm 2 mặt LED Paragon PEAC26G (Pin lưu điện 2 giờ)",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Đèn Exit & Chiếu sáng sự cố",
+                    unit="cái",
+                    stock_quantity=220.0,
+                    cost_price=360000.0,
+                    retail_price=540000.0,
+                    dealer_price=440000.0,
+                    project_discount_rate=6.0,
+                    spec="Nguồn tự sạc, pin Ni-Cd 2 giờ, bóng LED siêu sáng tiết kiệm điện",
+                    notes="Chỉ dẫn lối thoát nạn hành lang và cầu thang thoát hiểm"
+                ),
+                InventoryItem(
+                    id="inv-com-lgt-002",
+                    sku="VTX-COM-LGT-002",
+                    name="Đèn chiếu sáng sự cố khẩn cấp 2 mắt LED Kentom KT-2200EL",
+                    warehouse_type=WarehouseType.COMMERCIAL,
+                    category="Đèn Exit & Chiếu sáng sự cố",
+                    unit="cái",
+                    stock_quantity=310.0,
+                    cost_price=280000.0,
+                    retail_price=430000.0,
+                    dealer_price=350000.0,
+                    project_discount_rate=6.0,
+                    spec="2 bóng LED xoay chỉnh góc linh hoạt, tự động sáng khi mất điện lưới",
+                    notes="Chiếu sáng khẩn cấp lối thoát hiểm khi xảy ra hỏa hoạn"
+                )
+            ]
+
+            for item in seed_items:
+                bom_json = json.dumps(item.bom_data, ensure_ascii=False) if item.bom_data else ""
+                cursor.execute("""
+                INSERT OR REPLACE INTO inventory_items (
+                    id, sku, name, warehouse_type, category, unit,
+                    stock_quantity, cost_price, retail_price, dealer_price, project_discount_rate,
+                    is_custom_dimensions, default_length, default_width, default_thickness, material_type,
+                    bom_data, spec, notes, created_at, updated_at
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """, (
+                    item.id, item.sku, item.name, item.warehouse_type.value if hasattr(item.warehouse_type, "value") else str(item.warehouse_type),
+                    item.category, item.unit, item.stock_quantity, item.cost_price, item.retail_price, item.dealer_price, item.project_discount_rate,
+                    1 if item.is_custom_dimensions else 0, item.default_length, item.default_width, item.default_thickness, item.material_type,
+                    bom_json, item.spec, item.notes, item.created_at, item.updated_at
+                ))
+            conn.commit()
+
+    def get_inventory_items(
+        self,
+        warehouse_type: Optional[str] = None,
+        category: Optional[str] = None,
+        search: Optional[str] = None
+    ) -> List[InventoryItem]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            query = "SELECT * FROM inventory_items WHERE 1=1"
+            params = []
+
+            if warehouse_type:
+                query += " AND warehouse_type = ?"
+                params.append(warehouse_type.upper())
+            if category:
+                query += " AND category = ?"
+                params.append(category)
+            if search:
+                query += " AND (name LIKE ? OR sku LIKE ? OR spec LIKE ?)"
+                kw = f"%{search.strip()}%"
+                params.extend([kw, kw, kw])
+
+            query += " ORDER BY category ASC, sku ASC"
+            cursor.execute(query, params)
+            rows = cursor.fetchall()
+            
+            items = []
+            for r in rows:
+                bom_d = None
+                if r["bom_data"]:
+                    try:
+                        bom_d = json.loads(r["bom_data"])
+                    except Exception:
+                        bom_d = None
+                items.append(InventoryItem(
+                    id=r["id"],
+                    sku=r["sku"],
+                    name=r["name"],
+                    warehouse_type=WarehouseType(r["warehouse_type"]),
+                    category=r["category"],
+                    unit=r["unit"],
+                    stock_quantity=r["stock_quantity"] or 0.0,
+                    cost_price=r["cost_price"] or 0.0,
+                    retail_price=r["retail_price"] or 0.0,
+                    dealer_price=r["dealer_price"] or 0.0,
+                    project_discount_rate=r["project_discount_rate"] or 0.0,
+                    is_custom_dimensions=bool(r["is_custom_dimensions"]),
+                    default_length=r["default_length"],
+                    default_width=r["default_width"],
+                    default_thickness=r["default_thickness"],
+                    material_type=r["material_type"],
+                    bom_data=bom_d,
+                    spec=r["spec"] or "",
+                    notes=r["notes"] or "",
+                    created_at=r["created_at"] or "",
+                    updated_at=r["updated_at"] or ""
+                ))
+            return items
+
+    def get_inventory_item_by_id(self, item_id: str) -> Optional[InventoryItem]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM inventory_items WHERE id = ?", (item_id,))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            bom_d = None
+            if r["bom_data"]:
+                try:
+                    bom_d = json.loads(r["bom_data"])
+                except Exception:
+                    bom_d = None
+            return InventoryItem(
+                id=r["id"],
+                sku=r["sku"],
+                name=r["name"],
+                warehouse_type=WarehouseType(r["warehouse_type"]),
+                category=r["category"],
+                unit=r["unit"],
+                stock_quantity=r["stock_quantity"] or 0.0,
+                cost_price=r["cost_price"] or 0.0,
+                retail_price=r["retail_price"] or 0.0,
+                dealer_price=r["dealer_price"] or 0.0,
+                project_discount_rate=r["project_discount_rate"] or 0.0,
+                is_custom_dimensions=bool(r["is_custom_dimensions"]),
+                default_length=r["default_length"],
+                default_width=r["default_width"],
+                default_thickness=r["default_thickness"],
+                material_type=r["material_type"],
+                bom_data=bom_d,
+                spec=r["spec"] or "",
+                notes=r["notes"] or "",
+                created_at=r["created_at"] or "",
+                updated_at=r["updated_at"] or ""
+            )
+
+    def get_inventory_item_by_sku(self, sku: str) -> Optional[InventoryItem]:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT * FROM inventory_items WHERE sku = ?", (sku,))
+            r = cursor.fetchone()
+            if not r:
+                return None
+            bom_d = None
+            if r["bom_data"]:
+                try:
+                    bom_d = json.loads(r["bom_data"])
+                except Exception:
+                    bom_d = None
+            return InventoryItem(
+                id=r["id"],
+                sku=r["sku"],
+                name=r["name"],
+                warehouse_type=WarehouseType(r["warehouse_type"]),
+                category=r["category"],
+                unit=r["unit"],
+                stock_quantity=r["stock_quantity"] or 0.0,
+                cost_price=r["cost_price"] or 0.0,
+                retail_price=r["retail_price"] or 0.0,
+                dealer_price=r["dealer_price"] or 0.0,
+                project_discount_rate=r["project_discount_rate"] or 0.0,
+                is_custom_dimensions=bool(r["is_custom_dimensions"]),
+                default_length=r["default_length"],
+                default_width=r["default_width"],
+                default_thickness=r["default_thickness"],
+                material_type=r["material_type"],
+                bom_data=bom_d,
+                spec=r["spec"] or "",
+                notes=r["notes"] or "",
+                created_at=r["created_at"] or "",
+                updated_at=r["updated_at"] or ""
+            )
+
+    def create_inventory_item(self, item: InventoryItem) -> InventoryItem:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            bom_json = json.dumps(item.bom_data, ensure_ascii=False) if item.bom_data else ""
+            cursor.execute("""
+            INSERT INTO inventory_items (
+                id, sku, name, warehouse_type, category, unit,
+                stock_quantity, cost_price, retail_price, dealer_price, project_discount_rate,
+                is_custom_dimensions, default_length, default_width, default_thickness, material_type,
+                bom_data, spec, notes, created_at, updated_at
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            """, (
+                item.id, item.sku, item.name, item.warehouse_type.value if hasattr(item.warehouse_type, "value") else str(item.warehouse_type),
+                item.category, item.unit, item.stock_quantity, item.cost_price, item.retail_price, item.dealer_price, item.project_discount_rate,
+                1 if item.is_custom_dimensions else 0, item.default_length, item.default_width, item.default_thickness, item.material_type,
+                bom_json, item.spec, item.notes, item.created_at, item.updated_at
+            ))
+            conn.commit()
+            return item
+
+    def update_inventory_item(self, item_id: str, updates: Dict[str, Any]) -> Optional[InventoryItem]:
+        item = self.get_inventory_item_by_id(item_id)
+        if not item:
+            return None
+        
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            set_clauses = []
+            params = []
+            
+            for k, v in updates.items():
+                if k == "warehouse_type" and hasattr(v, "value"):
+                    v = v.value
+                elif k == "bom_data" and isinstance(v, dict):
+                    v = json.dumps(v, ensure_ascii=False)
+                elif k == "is_custom_dimensions":
+                    v = 1 if v else 0
+                set_clauses.append(f"{k} = ?")
+                params.append(v)
+            
+            set_clauses.append("updated_at = ?")
+            params.append(datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+            params.append(item_id)
+            
+            query = f"UPDATE inventory_items SET {', '.join(set_clauses)} WHERE id = ?"
+            cursor.execute(query, params)
+            conn.commit()
+            
+        return self.get_inventory_item_by_id(item_id)
+
+    def delete_inventory_item(self, item_id: str) -> bool:
+        with self._get_connection() as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM inventory_items WHERE id = ?", (item_id,))
+            conn.commit()
+            return cursor.rowcount > 0
+
 
 db = Database()
+
 

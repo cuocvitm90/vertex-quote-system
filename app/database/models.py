@@ -344,4 +344,126 @@ class GeofenceConfigUpdateRequest(BaseModel):
     address: Optional[str] = None
 
 
+# -------------------------------------------------------------
+# Inventory & BOM Management Models (Multi-Tier Pricing Engine)
+# -------------------------------------------------------------
+class WarehouseType(str, Enum):
+    MANUFACTURING = "MANUFACTURING"    # Kho Sản Xuất (Vật tư thô, tôn, nhôm, tấm ốp gầm pin xe điện VinFast, ống gió EI, tủ điện)
+    COMMERCIAL = "COMMERCIAL"          # Kho Thương Mại & Dự Án (Thiết bị PCCC, bình chữa cháy, van, sprinkler, báo cháy)
 
+
+class CustomerTier(str, Enum):
+    RETAIL = "RETAIL"                  # Khách Lẻ / Trực Tiếp (Áp dụng Giá Lẻ)
+    DEALER = "DEALER"                  # Đại Lý Phân Phối (Áp dụng Giá Đại Lý)
+    PROJECT = "PROJECT"                # Dự Án PCCC / Nhà Thầu MEP (Áp dụng Chiết Khấu Dự Án %)
+
+
+class BOMComponent(BaseModel):
+    material_name: str
+    spec: Optional[str] = ""
+    unit: str = "kg"
+    quantity: float = 1.0
+    unit_cost: float = 0.0
+    total_cost: float = 0.0
+
+
+class BOMBreakdown(BaseModel):
+    raw_materials: List[BOMComponent] = []
+    raw_material_cost: float = 0.0
+    scrap_waste_ratio: float = 0.05    # 5% Phế liệu / Hao hụt
+    scrap_waste_cost: float = 0.0
+    labor_cost: float = 0.0            # Chi phí nhân công sản xuất / dập / hàn / sơn
+    overhead_cost: float = 0.0         # Chi phí quản lý xưởng / khấu hao máy / vận chuyển
+    calculated_cost_price: float = 0.0 # Giá vốn xuất xưởng thực tế
+    margin_retail: float = 0.30        # 30% Biên độ bán lẻ
+    margin_dealer: float = 0.15        # 15% Biên độ đại lý
+
+
+class InventoryItem(BaseModel):
+    id: str
+    sku: str
+    name: str
+    warehouse_type: WarehouseType = WarehouseType.MANUFACTURING
+    category: str = "Tôn & Kim loại tấm"
+    unit: str = "cái"
+    stock_quantity: float = 0.0
+    
+    # Multi-Tier Pricing System
+    cost_price: float = 0.0            # 1. Giá Vốn (Factory / Import Cost)
+    retail_price: float = 0.0          # 2. Giá Lẻ (Listed Price)
+    dealer_price: float = 0.0          # 3. Giá Đại Lý (Distribution Price)
+    project_discount_rate: float = 0.0 # 4. Chiết Khấu Dự Án % (Project Discount %)
+    
+    # Custom Dimensions (For Manufacturing Items like Ducts, VinFast EV Skid Plates, Enclosures)
+    is_custom_dimensions: bool = False
+    default_length: Optional[float] = None     # mm
+    default_width: Optional[float] = None      # mm
+    default_thickness: Optional[float] = None  # mm
+    material_type: Optional[str] = None        # "THÉP_MẠ_KẼM", "NHÔM_AL5052", "INOX_304", "VỮA_CHỐNG_CHÁY"
+    
+    # BOM Definition (JSON string / dict)
+    bom_data: Optional[Dict[str, Any]] = None
+    spec: Optional[str] = ""
+    notes: Optional[str] = ""
+    created_at: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+    updated_at: str = Field(default_factory=lambda: datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+
+
+class InventoryItemCreateRequest(BaseModel):
+    sku: str
+    name: str
+    warehouse_type: WarehouseType
+    category: str
+    unit: str = "cái"
+    stock_quantity: float = 0.0
+    cost_price: float
+    retail_price: float
+    dealer_price: float
+    project_discount_rate: float = 0.0
+    is_custom_dimensions: bool = False
+    default_length: Optional[float] = None
+    default_width: Optional[float] = None
+    default_thickness: Optional[float] = None
+    material_type: Optional[str] = None
+    bom_data: Optional[Dict[str, Any]] = None
+    spec: Optional[str] = ""
+    notes: Optional[str] = ""
+
+
+class QuickQuoteLineItem(BaseModel):
+    inventory_id: Optional[str] = None
+    sku: str
+    item_name: str
+    warehouse_type: WarehouseType = WarehouseType.COMMERCIAL
+    category: str = "Thiết bị PCCC"
+    unit: str = "cái"
+    quantity: float = 1.0
+    
+    # Custom Dimensions
+    length_mm: Optional[float] = None
+    width_mm: Optional[float] = None
+    thickness_mm: Optional[float] = None
+    calculated_area_m2: Optional[float] = None
+    calculated_weight_kg: Optional[float] = None
+    
+    # Pricing & Margin
+    cost_price: float = 0.0
+    unit_price: float = 0.0
+    total_price: float = 0.0
+    gross_margin_amount: float = 0.0
+    gross_margin_percent: float = 0.0
+    applied_tier: str = "RETAIL"
+    notes: Optional[str] = ""
+
+
+class QuickQuoteCreateRequest(BaseModel):
+    customer_name: str
+    customer_phone: Optional[str] = ""
+    customer_email: Optional[str] = ""
+    project_name: str
+    project_address: Optional[str] = ""
+    customer_tier: CustomerTier = CustomerTier.RETAIL
+    items: List[QuickQuoteLineItem]
+    vat_rate: float = 0.08
+    special_discount_percent: float = 0.0
+    notes: Optional[str] = ""

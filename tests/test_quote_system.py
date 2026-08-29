@@ -1692,6 +1692,253 @@ def test_security_cors_configuration():
     assert "access-control-allow-origin" in res.headers
 
 
+# ==============================================================================
+# TESTS FOR INVENTORY, BOM & MULTI-TIER QUOTE BUILDER MODULES
+# ==============================================================================
+
+def test_inventory_warehouse_isolation_and_filtering():
+    """Test warehouse isolation between Manufacturing and Commercial/Project stocks"""
+    from app.services.auth import create_access_token
+    from app.database.db import db
+    from app.database.models import WarehouseType
+
+    user = db.get_user_by_username("admin")
+    token = create_access_token(user)
+    headers = {"Authorization": f"Bearer {token}"}
+    client.cookies.set("access_token", token)
+
+    # 1. Test page access
+    res_page = client.get("/inventory", headers=headers)
+    assert res_page.status_code == 200
+    assert "KHO SẢN XUẤT" in res_page.text
+    assert "KHO THƯƠNG MẠI" in res_page.text
+
+    # 2. Test API Manufacturing isolation
+    res_mfg = client.get("/api/inventory/items?warehouse_type=MANUFACTURING", headers=headers)
+    assert res_mfg.status_code == 200
+    mfg_items = res_mfg.json()["items"]
+    assert len(mfg_items) >= 12
+    for item in mfg_items:
+        assert item["warehouse_type"] == "MANUFACTURING"
+
+    # Check presence of VinFast EV Skid Plates
+    mfg_skus = [i["sku"] for i in mfg_items]
+    assert "VTX-MFG-EV-VF8" in mfg_skus
+    assert "VTX-MFG-EV-VF9" in mfg_skus
+    assert "VTX-MFG-EV-VF5" in mfg_skus
+    assert "VTX-MFG-DUCT-EI30" in mfg_skus
+
+    # 3. Test API Commercial isolation
+    res_com = client.get("/api/inventory/items?warehouse_type=COMMERCIAL", headers=headers)
+    assert res_com.status_code == 200
+    com_items = res_com.json()["items"]
+    assert len(com_items) >= 12
+    for item in com_items:
+        assert item["warehouse_type"] == "COMMERCIAL"
+
+    com_skus = [i["sku"] for i in com_items]
+    assert "VTX-COM-EXT-001" in com_skus
+    assert "VTX-COM-SPK-001" in com_skus
+    assert "VTX-COM-VLV-001" in com_skus
+    assert "VTX-COM-ALM-001" in com_skus
+
+    # 4. Test Search filter
+    res_search = client.get("/api/inventory/items?search=VinFast", headers=headers)
+    assert res_search.status_code == 200
+    search_items = res_search.json()["items"]
+    assert len(search_items) >= 3
+
+
+def test_bom_calculation_engine():
+    """Test mathematical accuracy of factory cost aggregation and pricing margin targets"""
+    from app.tools.bom_engine import calculate_bom_cost
+
+    raw_mats = [
+        {"material_name": "Tấm nhôm AL5052 (3.0mm)", "quantity": 25.0, "unit_cost": 115000.0},
+        {"material_name": "Bulong Inox 304", "quantity": 1.0, "unit_cost": 180000.0}
+    ]
+    # Raw material cost = 25 * 115000 + 180000 = 2875000 + 180000 = 3055000
+    # Scrap waste (5%) = 3055000 * 0.05 = 152750
+    # Labor = 750000, Overhead = 475000
+    # Expected Real Cost = 3055000 + 152750 + 750000 + 475000 = 4432750
+    bom_res = calculate_bom_cost(
+        raw_materials=raw_mats,
+        scrap_waste_ratio=0.05,
+        labor_cost=750000.0,
+        overhead_cost=475000.0,
+        margin_retail=0.30,
+        margin_dealer=0.15
+    )
+
+    assert bom_res["raw_material_cost"] == 3055000.0
+    assert bom_res["scrap_waste_cost"] == 152750.0
+    assert bom_res["calculated_cost_price"] == 4432750.0
+    assert bom_res["suggested_retail_price"] > bom_res["calculated_cost_price"]
+    assert bom_res["suggested_dealer_price"] > bom_res["calculated_cost_price"]
+    assert bom_res["suggested_retail_price"] > bom_res["suggested_dealer_price"]
+
+
+def test_manufacturing_dimensions_and_weight_calculator():
+    """Test custom dimension, area (m2) and weight (kg) formulas for manufactured goods"""
+    from app.tools.bom_engine import calculate_manufacturing_dimensions
+
+    # 1. Test VinFast VF8 Skid Plate (2150mm x 1450mm x 3.0mm AL5052)
+    # Area = (2150 * 1450) / 10^6 = 3.1175 m2
+    # Weight = 3.1175 m2 * 3.0mm * 2.70 kg/m2/mm = 25.25 kg
+    vf8_res = calculate_manufacturing_dimensions(
+        category="Tấm ốp gầm pin xe điện VinFast",
+        material_type="NHÔM_AL5052",
+        length_mm=2150,
+        width_mm=1450,
+        thickness_mm=3.0,
+        base_cost_price=4850000,
+        base_retail_price=7500000,
+        base_dealer_price=6200000,
+        quantity=2
+    )
+    assert vf8_res["area_per_unit_m2"] == 3.1175
+    assert vf8_res["total_area_m2"] == round(3.1175 * 2, 4)
+    assert vf8_res["weight_per_unit_kg"] == 25.25
+    assert vf8_res["total_weight_kg"] == 50.5
+
+    # 2. Test Rectangular Duct (1200mm L x 500mm W x 300mm H)
+    # Area = 2 * (500 + 300) * 1200 / 10^6 = 2 * 800 * 1200 / 10^6 = 1.92 m2
+    duct_res = calculate_manufacturing_dimensions(
+        category="Ống gió chống cháy EI",
+        material_type="THÉP_MẠ_KẼM",
+        length_mm=1200,
+        width_mm=500,
+        height_mm=300,
+        thickness_mm=0.75,
+        base_cost_price=380000,
+        base_retail_price=560000,
+        base_dealer_price=480000,
+        quantity=1
+    )
+    assert duct_res["area_per_unit_m2"] == 1.92
+    assert duct_res["unit_cost_price"] == round(380000 * 1.92, 0)
+    assert duct_res["unit_retail_price"] == round(560000 * 1.92, 0)
+
+
+def test_multi_tier_pricing_rules():
+    """Test 4-tier pricing engine for Retail, Dealer, and Project contracting tiers"""
+    from app.tools.bom_engine import resolve_tier_price
+    from app.database.models import CustomerTier
+
+    cost = 1000000.0
+    retail = 1500000.0
+    dealer = 1250000.0
+    proj_disc = 10.0
+
+    # 1. Retail Tier
+    u_ret, c_ret, d_ret = resolve_tier_price(cost, retail, dealer, proj_disc, CustomerTier.RETAIL)
+    assert u_ret == 1500000.0
+    assert d_ret == 0.0
+
+    # 2. Dealer Tier
+    u_dlr, c_dlr, d_dlr = resolve_tier_price(cost, retail, dealer, proj_disc, CustomerTier.DEALER)
+    assert u_dlr == 1250000.0
+    assert d_dlr == round(((1500000 - 1250000) / 1500000 * 100), 1)
+
+    # 3. Project Tier (Standard < 500M)
+    u_prj, c_prj, d_prj = resolve_tier_price(cost, retail, dealer, proj_disc, CustomerTier.PROJECT, total_quote_value=100000000)
+    assert u_prj == round(1500000 * (1 - 0.10), 0)
+    assert d_prj == 10.0
+
+    # 4. Project Tier (Large contract >= 1B -> extra 4% discount)
+    u_prj_large, _, d_prj_large = resolve_tier_price(cost, retail, dealer, proj_disc, CustomerTier.PROJECT, total_quote_value=1200000000)
+    assert d_prj_large == 14.0
+    assert u_prj_large == round(1500000 * (1 - 0.14), 0)
+
+
+def test_quote_builder_interactive_line_item_and_save():
+    """Test full workflow of the interactive Quote Builder workspace and quotation persistence"""
+    from app.services.auth import create_access_token
+    from app.database.db import db
+
+    user = db.get_user_by_username("admin")
+    token = create_access_token(user)
+    headers = {"Authorization": f"Bearer {token}"}
+    client.cookies.set("access_token", token)
+
+    # 1. Test Quote Builder page load
+    res_page = client.get("/quote-builder", headers=headers)
+    assert res_page.status_code == 200
+    assert "ĐỘNG CƠ GIÁ 4 TẦNG" in res_page.text or "Lập Báo Giá Thông Minh" in res_page.text
+
+    # 2. Test Line Item calculation API for VinFast VF8 Skid plate with Dealer tier
+    res_calc = client.post(
+        "/api/quote-builder/calculate-line-item",
+        json={
+            "inventory_id": "inv-mfg-ev-001",
+            "customer_tier": "DEALER",
+            "quantity": 5
+        },
+        headers=headers
+    )
+    assert res_calc.status_code == 200
+    calc_data = res_calc.json()["data"]
+    assert calc_data["unit_price"] == 6200000.0
+    assert calc_data["total_price"] == 31000000.0
+    assert calc_data["margin_percent"] > 20.0
+
+    # 3. Test saving a complete Quote via Quote Builder
+    save_payload = {
+        "customer_name": "Công Ty CP Giao Hàng & Taxi Xanh SM",
+        "customer_phone": "0912.888.999",
+        "customer_email": "taxixanh@vinfast.vn",
+        "project_name": "Gói Tấm Ốp Bảo Vệ Gầm Pin VinFast VF8 & Thiết Bị PCCC",
+        "project_address": "Khu Đô Thị Vinhomes Ocean Park, Gia Lâm, Hà Nội",
+        "customer_tier": "DEALER",
+        "vat_rate": 0.08,
+        "special_discount_percent": 2.0,
+        "items": [
+            {
+                "inventory_id": "inv-mfg-ev-001",
+                "sku": "VTX-MFG-EV-VF8",
+                "item_name": "Tấm ốp bảo vệ gầm pin xe điện VinFast VF8 (Nhôm AL5052 3.0mm)",
+                "warehouse_type": "MANUFACTURING",
+                "category": "Tấm ốp gầm pin xe điện VinFast",
+                "unit": "tấm",
+                "quantity": 10,
+                "cost_price": 4850000.0,
+                "unit_price": 6200000.0,
+                "total_price": 62000000.0,
+                "applied_tier": "DEALER"
+            },
+            {
+                "inventory_id": "inv-com-ext-001",
+                "sku": "VTX-COM-EXT-001",
+                "item_name": "Bình chữa cháy bột ABC 4kg Tomoken",
+                "warehouse_type": "COMMERCIAL",
+                "category": "Bình chữa cháy",
+                "unit": "bình",
+                "quantity": 20,
+                "cost_price": 215000.0,
+                "unit_price": 275000.0,
+                "total_price": 5500000.0,
+                "applied_tier": "DEALER"
+            }
+        ]
+    }
+
+    res_save = client.post("/api/quote-builder/save-quote", json=save_payload, headers=headers)
+    assert res_save.status_code == 200
+    save_data = res_save.json()
+    assert save_data["status"] == "success"
+    assert "VTX-" in save_data["quote_code"]
+    assert save_data["total_amount"] > 0
+    assert save_data["margin_percent"] > 15.0
+
+    # Verify quote saved in DB
+    created_q = db.get_quote_by_id(save_data["quote_id"])
+    assert created_q is not None
+    assert created_q.customer_name == "Công Ty CP Giao Hàng & Taxi Xanh SM"
+    assert len(created_q.items) == 2
+    assert created_q.total_amount == save_data["total_amount"]
+
+
+
 
 
 

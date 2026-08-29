@@ -1,0 +1,818 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lập Báo Giá Thông Minh &amp; Động Cơ Giá 4 Tầng - VERTEX PCCC</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="alternate icon" href="/static/images/logo-icon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --vertex-orange: #FF6600;
+            --vertex-orange-light: #FFF5EB;
+            --vertex-navy: #0F172A;
+            --vertex-blue: #2563EB;
+            --vertex-green: #059669;
+            --vertex-purple: #7C3AED;
+            --vertex-gray-bg: #F8FAFC;
+            --vertex-card-border: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F1F5F9;
+            color: #1E293B;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Tier Selector Pill Buttons */
+        .tier-selector-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .tier-pill-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 18px;
+            background: #FFFFFF;
+            border: 2px solid #E2E8F0;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .tier-pill-btn:hover {
+            border-color: #CBD5E1;
+            background: #F8FAFC;
+        }
+
+        .tier-pill-btn.active {
+            border-color: var(--vertex-orange);
+            background: #FFF7ED;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.15);
+        }
+
+        .tier-pill-btn .tier-icon {
+            width: 38px;
+            height: 38px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            background: #F1F5F9;
+            color: #475569;
+        }
+
+        .tier-pill-btn.active .tier-icon {
+            background: var(--vertex-orange);
+            color: #FFFFFF;
+        }
+
+        .tier-pill-info {
+            text-align: left;
+        }
+
+        .tier-pill-title {
+            font-size: 13.5px;
+            font-weight: 800;
+            color: #0F172A;
+            margin: 0;
+        }
+
+        .tier-pill-sub {
+            font-size: 11.5px;
+            color: #64748B;
+            margin: 2px 0 0 0;
+        }
+
+        /* Spreadsheet Table */
+        .quote-sheet-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 12.5px;
+            margin-top: 10px;
+        }
+
+        .quote-sheet-table th {
+            background: #F1F5F9;
+            padding: 10px 12px;
+            font-weight: 700;
+            color: #475569;
+            border-bottom: 2px solid #CBD5E1;
+            text-align: left;
+        }
+
+        .quote-sheet-table td {
+            padding: 8px 10px;
+            border-bottom: 1px solid #E2E8F0;
+            vertical-align: middle;
+        }
+
+        .input-sheet {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #CBD5E1;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-family: inherit;
+            background: #FFFFFF;
+            box-sizing: border-box;
+        }
+
+        .input-sheet:focus {
+            outline: none;
+            border-color: var(--vertex-orange);
+            box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.2);
+        }
+
+        /* Dimension Inputs Grid */
+        .dim-inputs-wrap {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 4px;
+            min-width: 180px;
+        }
+
+        .dim-tag-badge {
+            font-size: 10.5px;
+            background: #EEF2FF;
+            color: #4F46E5;
+            padding: 1px 4px;
+            border-radius: 4px;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 2px;
+        }
+
+        /* Margin Indicator */
+        .margin-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-weight: 800;
+            font-size: 11.5px;
+        }
+
+        /* Summary Sidebar */
+        .quote-summary-panel {
+            background: #FFFFFF;
+            border: 1px solid #E2E8F0;
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+            position: sticky;
+            top: 20px;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px dashed #E2E8F0;
+            font-size: 13.5px;
+        }
+
+        .summary-total {
+            background: #FFF7ED;
+            border: 1px solid #FFEDD5;
+            padding: 12px 14px;
+            border-radius: 8px;
+            margin: 14px 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-group">
+                <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="header-logo" onerror="this.src='/static/images/logo.svg'">
+                    <div>
+                        <span class="logo-title">VERTEX</span>
+                        <span class="logo-subtitle">PCCC &amp; MANUFACTURING</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="header-actions">
+                <a href="/" class="btn btn-outline" title="Tổng quan các gói báo giá">
+                    <i class="fa-solid fa-table-list"></i> <span>Tổng Báo Giá</span>
+                </a>
+
+                <a href="/inventory" class="btn btn-outline" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked" style="color:var(--vertex-orange);"></i> <span>Kho &amp; BOM</span>
+                </a>
+
+                <a href="/quote-builder" class="btn btn-primary" style="background:var(--vertex-orange);" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature"></i> <span>Lập Báo Giá</span>
+                </a>
+
+                <a href="/cad-takeoff" class="btn btn-outline" title="Bóc tách bản vẽ CAD/BIM">
+                    <i class="fa-solid fa-layer-group"></i> <span>Bóc Tách CAD</span>
+                </a>
+
+                <a href="/field-reports" class="btn btn-outline" title="Chấm công GPS & Hiện trường">
+                    <i class="fa-solid fa-location-dot" style="color:#10B981;"></i> <span>Hiện Trường</span>
+                </a>
+
+                <a href="/docs" target="_blank" class="btn btn-outline" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code"></i> <span>API Docs</span>
+                </a>
+
+                <!-- User Profile & RBAC Role Chip -->
+                <div class="user-profile-chip">
+                    <div class="user-avatar">
+                        {{ user.full_name[0] if user and user.full_name else 'V' }}
+                    </div>
+                    <div class="user-meta">
+                        <span class="user-name">{{ user.full_name if user else 'Người dùng' }}</span>
+                        <span class="user-role-tag">
+                            <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
+                        </span>
+                    </div>
+                    <a href="/logout" class="btn-logout" title="Đăng xuất">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-container">
+        <!-- 1. Customer Tier Selector (3 Tầng Khách Hàng) -->
+        <div class="tier-selector-container">
+            <button type="button" class="tier-pill-btn active" id="tier-btn-retail" onclick="setCustomerTier('RETAIL')">
+                <div class="tier-icon"><i class="fa-solid fa-user-check"></i></div>
+                <div class="tier-pill-info">
+                    <div class="tier-pill-title">1. KHÁCH LẺ / TRỰC TIẾP (RETAIL)</div>
+                    <div class="tier-pill-sub">Áp dụng Giá Lẻ Niêm Yết Tiêu Chuẩn</div>
+                </div>
+            </button>
+
+            <button type="button" class="tier-pill-btn" id="tier-btn-dealer" onclick="setCustomerTier('DEALER')">
+                <div class="tier-icon"><i class="fa-solid fa-handshake"></i></div>
+                <div class="tier-pill-info">
+                    <div class="tier-pill-title">2. ĐẠI LÝ PHÂN PHỐI (DEALER)</div>
+                    <div class="tier-pill-sub">Áp dụng Giá Đại Lý Ưu Đãi (Giảm ~15-20%)</div>
+                </div>
+            </button>
+
+            <button type="button" class="tier-pill-btn" id="tier-btn-project" onclick="setCustomerTier('PROJECT')">
+                <div class="tier-icon"><i class="fa-solid fa-building-shield"></i></div>
+                <div class="tier-pill-info">
+                    <div class="tier-pill-title">3. DỰ ÁN PCCC &amp; NHÀ THẦU MEP</div>
+                    <div class="tier-pill-sub">Áp dụng Chiết Khấu Dự Án Theo Quy Mô Gói Thầu</div>
+                </div>
+            </button>
+        </div>
+
+        <div style="display:grid; grid-template-columns: 1fr 340px; gap:20px;">
+            <!-- Left Workspace: Customer Info & Interactive Spreadsheet -->
+            <div>
+                <!-- Customer & Project Header Box -->
+                <div class="card" style="margin-bottom:16px; padding:16px 20px;">
+                    <div style="font-weight:800; font-size:14px; color:#0F172A; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-address-card" style="color:var(--vertex-orange);"></i> THÔNG TIN KHÁCH HÀNG &amp; DỰ ÁN CƠ ĐIỆN PCCC
+                    </div>
+                    <div style="display:grid; grid-template-columns: 1.5fr 1fr 1fr; gap:12px;">
+                        <div>
+                            <label style="font-size:11.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Tên Khách Hàng / Công Ty <span style="color:#EF4444;">*</span></label>
+                            <input type="text" id="cust-name" class="input-sheet" required placeholder="VD: Công ty CP Cơ Điện VinFast / Khách hàng A">
+                        </div>
+                        <div>
+                            <label style="font-size:11.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Số Điện Thoại</label>
+                            <input type="text" id="cust-phone" class="input-sheet" placeholder="0988.123.456">
+                        </div>
+                        <div>
+                            <label style="font-size:11.5px; font-weight:700; color:#475569; display:block; margin-bottom:3px;">Tên Dự Án / Công Trình <span style="color:#EF4444;">*</span></label>
+                            <input type="text" id="cust-project" class="input-sheet" required placeholder="VD: Nhà Máy VinFast Hải Phòng / Tòa Nhà Delta">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Quoting Sheet Grid -->
+                <div class="card" style="padding:0; overflow:hidden; border-radius:12px;">
+                    <div style="padding:12px 18px; background:#F8FAFC; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="font-weight:800; color:#0F172A; font-size:13.5px;">
+                            <i class="fa-solid fa-list-ol" style="color:var(--vertex-orange); margin-right:6px;"></i>
+                            BẢNG BÓC TÁCH KHỐI LƯỢNG &amp; ĐƠN GIÁ BÁO GIÁ
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button type="button" class="btn btn-outline" onclick="addNewLineItem()" style="padding:5px 10px; font-size:12px;">
+                                <i class="fa-solid fa-plus"></i> Thêm Dòng
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="overflow-x:auto;">
+                        <table class="quote-sheet-table" id="quote-sheet-table">
+                            <thead>
+                                <tr>
+                                    <th style="width:36px; text-align:center;">STT</th>
+                                    <th style="min-width:240px;">Sản Phẩm (Kho Sản Xuất / Thương Mại)</th>
+                                    <th style="min-width:180px;">Kích Thước (Dài &times; Rộng &times; Dày mm)</th>
+                                    <th style="width:75px; text-align:center;">ĐVT</th>
+                                    <th style="width:80px; text-align:center;">Số Lượng</th>
+                                    <th style="width:115px; text-align:right;">Đơn Giá (VNĐ)</th>
+                                    <th style="width:125px; text-align:right;">Thành Tiền</th>
+                                    <th style="width:90px; text-align:center;">Lợi Nhuận Gộp</th>
+                                    <th style="width:40px; text-align:center;">Xóa</th>
+                                </tr>
+                            </thead>
+                            <tbody id="quote-sheet-tbody">
+                                <!-- Dynamic rows inserted by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Sidebar: Financial Summary & Actions -->
+            <div>
+                <div class="quote-summary-panel">
+                    <div style="font-weight:800; font-size:14px; color:#0F172A; margin-bottom:14px; display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-calculator" style="color:var(--vertex-orange);"></i> TỔNG HỢP TÀI CHÍNH
+                    </div>
+
+                    <div class="summary-row">
+                        <span style="color:#64748B;">Nhóm Giá Áp Dụng:</span>
+                        <b id="sum-tier-label" style="color:var(--vertex-orange);">Khách Lẻ (Retail)</b>
+                    </div>
+
+                    <div class="summary-row">
+                        <span style="color:#64748B;">Tổng Tiền Trước Thuế:</span>
+                        <b id="sum-subtotal">0 đ</b>
+                    </div>
+
+                    <div class="summary-row">
+                        <span style="color:#64748B;">Chiết Khấu Thêm (%):</span>
+                        <div style="display:flex; align-items:center; gap:4px; max-width:80px;">
+                            <input type="number" id="sum-disc-rate" class="input-sheet" value="0" min="0" max="30" step="1" oninput="recalculateTotals()">
+                            <span>%</span>
+                        </div>
+                    </div>
+
+                    <div class="summary-row">
+                        <span style="color:#64748B;">Thuế VAT:</span>
+                        <select id="sum-vat-rate" class="input-sheet" style="max-width:90px;" onchange="recalculateTotals()">
+                            <option value="0.08" selected>8% VAT</option>
+                            <option value="0.10">10% VAT</option>
+                            <option value="0.00">0% VAT</option>
+                        </select>
+                    </div>
+
+                    <div class="summary-row">
+                        <span style="color:#64748B;">Tiền Thuế VAT:</span>
+                        <b id="sum-vat-amount">0 đ</b>
+                    </div>
+
+                    <!-- Grand Total Box -->
+                    <div class="summary-total">
+                        <div style="font-size:11.5px; font-weight:700; color:#EA580C; text-transform:uppercase;">Tổng Cộng Thanh Toán</div>
+                        <div id="sum-grand-total" style="font-size:22px; font-weight:800; color:#0F172A; margin:4px 0;">0 VNĐ</div>
+                        <div id="sum-total-words" style="font-size:11.5px; color:#475569; font-style:italic;">Không đồng</div>
+                    </div>
+
+                    <!-- Gross Margin Meter -->
+                    <div style="background:#F8FAFC; border:1px solid #E2E8F0; border-radius:8px; padding:12px; margin-bottom:16px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span style="font-size:11.5px; font-weight:700; color:#475569;">Biên Lợi Nhuận Gộp (Margin):</span>
+                            <span id="sum-margin-badge" class="margin-chip" style="background:#ECFDF5; color:#059669;">0%</span>
+                        </div>
+                        <div style="height:6px; background:#E2E8F0; border-radius:999px; overflow:hidden;">
+                            <div id="sum-margin-bar" style="height:100%; width:0%; background:#10B981; transition:all 0.3s ease;"></div>
+                        </div>
+                        <div id="sum-margin-label" style="font-size:10.5px; color:#64748B; margin-top:4px;">Chưa có dữ liệu tính toán</div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div style="display:flex; flex-direction:column; gap:10px;">
+                        <button type="button" class="btn btn-primary" onclick="submitSaveQuote()" style="background:linear-gradient(135deg, #FF6600 0%, #FF8533 100%); width:100%; padding:12px; font-size:14px; font-weight:800; justify-content:center;">
+                            <i class="fa-solid fa-floppy-disk"></i> LƯU &amp; XUẤT EXCEL VERTEX
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Inventory catalog from Backend
+        const allInventory = [
+            {% for item in mfg_items %}
+            {
+                id: "{{ item.id }}",
+                sku: "{{ item.sku }}",
+                name: "{{ item.name }}",
+                wh: "MANUFACTURING",
+                category: "{{ item.category }}",
+                unit: "{{ item.unit }}",
+                cost_price: {{ item.cost_price }},
+                retail_price: {{ item.retail_price }},
+                dealer_price: {{ item.dealer_price }},
+                project_discount_rate: {{ item.project_discount_rate }},
+                is_custom_dimensions: {{ 'true' if item.is_custom_dimensions else 'false' }},
+                default_length: {{ item.default_length or 0 }},
+                default_width: {{ item.default_width or 0 }},
+                default_thickness: {{ item.default_thickness or 0 }},
+                material_type: "{{ item.material_type or 'THÉP_MẠ_KẼM' }}"
+            },
+            {% endfor %}
+            {% for item in com_items %}
+            {
+                id: "{{ item.id }}",
+                sku: "{{ item.sku }}",
+                name: "{{ item.name }}",
+                wh: "COMMERCIAL",
+                category: "{{ item.category }}",
+                unit: "{{ item.unit }}",
+                cost_price: {{ item.cost_price }},
+                retail_price: {{ item.retail_price }},
+                dealer_price: {{ item.dealer_price }},
+                project_discount_rate: {{ item.project_discount_rate }},
+                is_custom_dimensions: false,
+                default_length: 0,
+                default_width: 0,
+                default_thickness: 0,
+                material_type: "TIÊU_CHUẨN"
+            },
+            {% endfor %}
+        ];
+
+        let currentCustomerTier = 'RETAIL';
+        let lineItemCounter = 0;
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => { toast.className = 'toast'; }, 3500);
+        }
+
+        function setCustomerTier(tier) {
+            currentCustomerTier = tier;
+            document.querySelectorAll('.tier-pill-btn').forEach(btn => btn.classList.remove('active'));
+            if (tier === 'RETAIL') {
+                document.getElementById('tier-btn-retail').classList.add('active');
+                document.getElementById('sum-tier-label').textContent = 'Khách Lẻ (Retail)';
+            } else if (tier === 'DEALER') {
+                document.getElementById('tier-btn-dealer').classList.add('active');
+                document.getElementById('sum-tier-label').textContent = 'Đại Lý (Dealer)';
+            } else {
+                document.getElementById('tier-btn-project').classList.add('active');
+                document.getElementById('sum-tier-label').textContent = 'Dự Án PCCC (Project)';
+            }
+
+            // Recalculate all lines based on new tier
+            document.querySelectorAll('.quote-row').forEach(row => {
+                recalculateRow(row.getAttribute('data-row-id'));
+            });
+        }
+
+        function addNewLineItem(prefSku = null) {
+            lineItemCounter++;
+            const rowId = `row-${lineItemCounter}`;
+            const tbody = document.getElementById('quote-sheet-tbody');
+
+            let optHtml = `<option value="">-- Chọn sản phẩm từ kho --</option>`;
+            optHtml += `<optgroup label="🏭 Kho Sản Xuất (Tôn, Nhôm, Gầm Pin VinFast, Ống Gió, Tủ Điện)">`;
+            allInventory.filter(i => i.wh === 'MANUFACTURING').forEach(i => {
+                const sel = prefSku && i.sku === prefSku ? 'selected' : '';
+                optHtml += `<option value="${i.id}" ${sel}>[${i.sku}] ${i.name}</option>`;
+            });
+            optHtml += `</optgroup>`;
+            optHtml += `<optgroup label="🛒 Kho Thương Mại & Dự Án (Bình Chữa Cháy, Sprinkler, Van, Báo Cháy)">`;
+            allInventory.filter(i => i.wh === 'COMMERCIAL').forEach(i => {
+                const sel = prefSku && i.sku === prefSku ? 'selected' : '';
+                optHtml += `<option value="${i.id}" ${sel}>[${i.sku}] ${i.name}</option>`;
+            });
+            optHtml += `</optgroup>`;
+
+            const tr = document.createElement('tr');
+            tr.className = 'quote-row';
+            tr.id = rowId;
+            tr.setAttribute('data-row-id', rowId);
+
+            tr.innerHTML = `
+                <td style="text-align:center; font-weight:700; color:#64748B;" class="row-stt">1</td>
+                <td>
+                    <select class="input-sheet item-select" onchange="onProductSelect('${rowId}')">
+                        ${optHtml}
+                    </select>
+                    <input type="text" class="input-sheet item-custom-name" placeholder="Hoặc gõ tên vật tư tùy chỉnh..." style="margin-top:4px; display:none;">
+                </td>
+                <td>
+                    <div class="dim-inputs-wrap" id="dim-wrap-${rowId}">
+                        <input type="number" class="input-sheet dim-len" placeholder="Dài (mm)" oninput="recalculateRow('${rowId}')" title="Chiều dài mm">
+                        <input type="number" class="input-sheet dim-wid" placeholder="Rộng (mm)" oninput="recalculateRow('${rowId}')" title="Chiều rộng mm">
+                        <input type="number" class="input-sheet dim-thk" placeholder="Dày (mm)" step="0.1" oninput="recalculateRow('${rowId}')" title="Độ dày mm">
+                    </div>
+                    <div class="dim-tag-badge" id="dim-tag-${rowId}" style="display:none;"></div>
+                </td>
+                <td style="text-align:center;">
+                    <input type="text" class="input-sheet item-unit" value="cái" style="text-align:center; width:55px;">
+                </td>
+                <td>
+                    <input type="number" class="input-sheet item-qty" value="1" min="0.01" step="any" style="text-align:center;" oninput="recalculateRow('${rowId}')">
+                </td>
+                <td>
+                    <input type="number" class="input-sheet item-price" value="0" style="text-align:right; font-weight:700;" oninput="recalculateRow('${rowId}', true)">
+                    <input type="hidden" class="item-cost" value="0">
+                </td>
+                <td style="text-align:right; font-weight:800; color:#0F172A;" class="row-total">
+                    0 đ
+                </td>
+                <td style="text-align:center;" class="row-margin">
+                    <span class="margin-chip" style="background:#F1F5F9; color:#64748B;">0%</span>
+                </td>
+                <td style="text-align:center;">
+                    <button type="button" class="btn-action-sm" onclick="removeLineItem('${rowId}')" style="color:#EF4444; border-color:#FECACA;" title="Xóa dòng">
+                        <i class="fa-solid fa-trash"></i>
+                    </button>
+                </td>
+            `;
+
+            tbody.appendChild(tr);
+            updateRowIndices();
+
+            if (prefSku) {
+                onProductSelect(rowId);
+            }
+        }
+
+        function removeLineItem(rowId) {
+            const tr = document.getElementById(rowId);
+            if (tr) {
+                tr.remove();
+                updateRowIndices();
+                recalculateTotals();
+            }
+        }
+
+        function updateRowIndices() {
+            document.querySelectorAll('.quote-row').forEach((r, idx) => {
+                const sttCell = r.querySelector('.row-stt');
+                if (sttCell) sttCell.textContent = idx + 1;
+            });
+        }
+
+        function onProductSelect(rowId) {
+            const tr = document.getElementById(rowId);
+            const select = tr.querySelector('.item-select');
+            const itemId = select.value;
+            const item = allInventory.find(i => i.id === itemId);
+
+            const dimWrap = tr.querySelector(`#dim-wrap-${rowId}`);
+            const dimTag = tr.querySelector(`#dim-tag-${rowId}`);
+            const unitInput = tr.querySelector('.item-unit');
+            const costInput = tr.querySelector('.item-cost');
+
+            if (item) {
+                unitInput.value = item.unit;
+                costInput.value = item.cost_price;
+
+                if (item.is_custom_dimensions) {
+                    dimWrap.style.display = 'grid';
+                    tr.querySelector('.dim-len').value = item.default_length || 1000;
+                    tr.querySelector('.dim-wid').value = item.default_width || 1000;
+                    tr.querySelector('.dim-thk').value = item.default_thickness || 1.0;
+                } else {
+                    tr.querySelector('.dim-len').value = '';
+                    tr.querySelector('.dim-wid').value = '';
+                    tr.querySelector('.dim-thk').value = '';
+                    dimTag.style.display = 'none';
+                }
+            }
+            recalculateRow(rowId);
+        }
+
+        async function recalculateRow(rowId, isManualPrice = false) {
+            const tr = document.getElementById(rowId);
+            if (!tr) return;
+
+            const select = tr.querySelector('.item-select');
+            const itemId = select.value;
+            const item = allInventory.find(i => i.id === itemId);
+
+            const qty = parseFloat(tr.querySelector('.item-qty').value) || 1;
+            const len = parseFloat(tr.querySelector('.dim-len').value) || 0;
+            const wid = parseFloat(tr.querySelector('.dim-wid').value) || 0;
+            const thk = parseFloat(tr.querySelector('.dim-thk').value) || 0;
+            const dimTag = tr.querySelector(`#dim-tag-${rowId}`);
+            const priceInput = tr.querySelector('.item-price');
+            const costInput = tr.querySelector('.item-cost');
+
+            let costPrice = item ? item.cost_price : (parseFloat(costInput.value) || 0);
+            let unitPrice = parseFloat(priceInput.value) || 0;
+
+            if (item && !isManualPrice) {
+                // Tier pricing resolution
+                if (currentCustomerTier === 'DEALER') {
+                    unitPrice = item.dealer_price || (item.retail_price * 0.85);
+                } else if (currentCustomerTier === 'PROJECT') {
+                    const disc = item.project_discount_rate || 8.0;
+                    unitPrice = Math.round(item.retail_price * (1.0 - disc / 100.0));
+                } else {
+                    unitPrice = item.retail_price;
+                }
+
+                // If custom dimensions (Ducts or VinFast EV protection plate)
+                if (item.is_custom_dimensions && len > 0 && wid > 0) {
+                    const areaM2 = (len * wid) / 1000000;
+                    const catLower = item.category.toLowerCase();
+                    if (catLower.includes('ống gió') || catLower.includes('duct')) {
+                        const ductArea = (2 * (len + wid) * 1200) / 1000000;
+                        dimTag.textContent = `DT: ${areaM2.toFixed(2)} m²`;
+                    } else {
+                        dimTag.textContent = `DT: ${areaM2.toFixed(2)} m² | ${(areaM2 * (thk || 3.0) * 2.7).toFixed(1)} kg`;
+                    }
+                    dimTag.style.display = 'inline-block';
+                }
+                priceInput.value = unitPrice;
+            }
+
+            const rowTotal = Math.round(unitPrice * qty);
+            const rowCostTotal = Math.round(costPrice * qty);
+            tr.querySelector('.row-total').textContent = `${rowTotal.toLocaleString()} đ`;
+
+            // Calculate Row Margin %
+            const marginAmt = rowTotal - rowCostTotal;
+            const marginPct = rowTotal > 0 ? (marginAmt / rowTotal * 100) : 0;
+            const marginCell = tr.querySelector('.row-margin');
+
+            let mColor = '#10B981';
+            let mBg = '#ECFDF5';
+            if (marginPct < 10) { mColor = '#EF4444'; mBg = '#FEF2F2'; }
+            else if (marginPct < 20) { mColor = '#F59E0B'; mBg = '#FFFBEB'; }
+
+            marginCell.innerHTML = `<span class="margin-chip" style="background:${mBg}; color:${mColor};">${marginPct.toFixed(1)}%</span>`;
+
+            recalculateTotals();
+        }
+
+        function recalculateTotals() {
+            let subtotal = 0;
+            let totalCost = 0;
+
+            document.querySelectorAll('.quote-row').forEach(tr => {
+                const qty = parseFloat(tr.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(tr.querySelector('.item-price').value) || 0;
+                const cost = parseFloat(tr.querySelector('.item-cost').value) || 0;
+
+                subtotal += (price * qty);
+                totalCost += (cost * qty);
+            });
+
+            const discRate = parseFloat(document.getElementById('sum-disc-rate').value) || 0;
+            const discAmt = subtotal * (discRate / 100);
+            const subAfterDisc = subtotal - discAmt;
+
+            const vatRate = parseFloat(document.getElementById('sum-vat-rate').value) || 0.08;
+            const vatAmt = subAfterDisc * vatRate;
+            const grandTotal = subAfterDisc + vatAmt;
+
+            document.getElementById('sum-subtotal').textContent = `${Math.round(subtotal).toLocaleString()} đ`;
+            document.getElementById('sum-vat-amount').textContent = `${Math.round(vatAmt).toLocaleString()} đ`;
+            document.getElementById('sum-grand-total').textContent = `${Math.round(grandTotal).toLocaleString()} VNĐ`;
+
+            // Calculate Overall Margin
+            const overallMarginAmt = subAfterDisc - totalCost;
+            const overallMarginPct = subAfterDisc > 0 ? (overallMarginAmt / subAfterDisc * 100) : 0;
+
+            const marginBadge = document.getElementById('sum-margin-badge');
+            const marginBar = document.getElementById('sum-margin-bar');
+            const marginLabel = document.getElementById('sum-margin-label');
+
+            marginBadge.textContent = `${overallMarginPct.toFixed(1)}%`;
+            marginBar.style.width = `${Math.min(100, Math.max(0, overallMarginPct))}%`;
+
+            if (overallMarginPct >= 22) {
+                marginBadge.style.color = '#059669'; marginBadge.style.background = '#ECFDF5';
+                marginBar.style.background = '#10B981';
+                marginLabel.textContent = 'Biên lợi nhuận gộp rất tốt (≥22%)';
+            } else if (overallMarginPct >= 12) {
+                marginBadge.style.color = '#2563EB'; marginBadge.style.background = '#EFF6FF';
+                marginBar.style.background = '#3B82F6';
+                marginLabel.textContent = 'Biên độ an toàn đạt chuẩn (12-21%)';
+            } else if (overallMarginPct >= 5) {
+                marginBadge.style.color = '#D97706'; marginBadge.style.background = '#FEF3C7';
+                marginBar.style.background = '#F59E0B';
+                marginLabel.textContent = 'Biên độ mỏng (5-11%) - Cần duyệt Manager';
+            } else {
+                marginBadge.style.color = '#DC2626'; marginBadge.style.background = '#FEE2E2';
+                marginBar.style.background = '#EF4444';
+                marginLabel.textContent = 'Cảnh báo lợi nhuận thấp / Sát giá vốn - Bắt buộc Sếp Tiến duyệt';
+            }
+        }
+
+        async function submitSaveQuote() {
+            const custName = document.getElementById('cust-name').value.trim();
+            const custPhone = document.getElementById('cust-phone').value.trim();
+            const projName = document.getElementById('cust-project').value.trim();
+
+            if (!custName || !projName) {
+                showToast('Vui lòng nhập Tên Khách Hàng và Tên Dự Án!', 'error');
+                return;
+            }
+
+            const rows = document.querySelectorAll('.quote-row');
+            if (rows.length === 0) {
+                showToast('Báo giá phải có ít nhất 1 dòng sản phẩm!', 'error');
+                return;
+            }
+
+            const items = [];
+            rows.forEach(tr => {
+                const select = tr.querySelector('.item-select');
+                const itemId = select.value;
+                const item = allInventory.find(i => i.id === itemId);
+
+                const qty = parseFloat(tr.querySelector('.item-qty').value) || 1;
+                const price = parseFloat(tr.querySelector('.item-price').value) || 0;
+                const cost = parseFloat(tr.querySelector('.item-cost').value) || 0;
+
+                items.push({
+                    inventory_id: itemId || null,
+                    sku: item ? item.sku : 'VTX-CUSTOM',
+                    item_name: item ? item.name : (tr.querySelector('.item-custom-name').value || 'Vật tư tùy chỉnh'),
+                    warehouse_type: item ? item.wh : 'COMMERCIAL',
+                    category: item ? item.category : 'Vật tư PCCC',
+                    unit: tr.querySelector('.item-unit').value || 'cái',
+                    quantity: qty,
+                    length_mm: parseFloat(tr.querySelector('.dim-len').value) || null,
+                    width_mm: parseFloat(tr.querySelector('.dim-wid').value) || null,
+                    thickness_mm: parseFloat(tr.querySelector('.dim-thk').value) || null,
+                    cost_price: cost,
+                    unit_price: price,
+                    total_price: price * qty,
+                    applied_tier: currentCustomerTier
+                });
+            });
+
+            const payload = {
+                customer_name: custName,
+                customer_phone: custPhone,
+                project_name: projName,
+                customer_tier: currentCustomerTier,
+                items: items,
+                vat_rate: parseFloat(document.getElementById('sum-vat-rate').value) || 0.08,
+                special_discount_percent: parseFloat(document.getElementById('sum-disc-rate').value) || 0.0
+            };
+
+            try {
+                showToast('Đang tạo báo giá và xuất Excel Vertex...', 'info');
+                const resp = await fetch('/api/quote-builder/save-quote', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Lưu báo giá thất bại');
+
+                showToast(`Đã lưu thành công mã ${data.quote_code}!`, 'success');
+                if (data.download_url) {
+                    setTimeout(() => {
+                        window.location.href = data.download_url;
+                    }, 1200);
+                }
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        // Initialize with default 2 lines or SKU from URL query param
+        window.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const addSku = urlParams.get('add_sku');
+
+            if (addSku) {
+                addNewLineItem(addSku);
+            } else {
+                addNewLineItem('VTX-MFG-EV-VF8');
+                addNewLineItem('VTX-COM-EXT-001');
+            }
+        });
+    </script>
+</body>
+</html>

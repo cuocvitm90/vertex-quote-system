@@ -22,7 +22,11 @@ from app.database.models import User
 from app.services.auth import get_current_user_optional
 from app.middlewares.rate_limiter import RateLimiterMiddleware
 from app.middlewares.security_headers import SecurityHeadersMiddleware
-from app.routers import auth_router, quotes_router, zalo_router, catalog_router, templates_router, cad_takeoff_router, field_reports_router
+from app.routers import (
+    auth_router, quotes_router, zalo_router, catalog_router,
+    templates_router, cad_takeoff_router, field_reports_router,
+    inventory_router, quote_builder_router
+)
 from app.tools.template_generator import create_master_template_excel
 
 _START_TIME = time.time()
@@ -35,6 +39,7 @@ async def lifespan(app: FastAPI):
     db._seed_catalog()
     db._seed_users()
     db._seed_master_template()
+    db._seed_inventory_data()
 
     # Generate master template excel if missing
     tpl_dir = Path(settings.STORAGE_DIR) / "templates"
@@ -101,6 +106,8 @@ app.include_router(catalog_router)
 app.include_router(templates_router)
 app.include_router(cad_takeoff_router)
 app.include_router(field_reports_router)
+app.include_router(inventory_router)
+app.include_router(quote_builder_router)
 
 # Ensure all API 404 / 500 / Validation errors return valid JSON (avoids client syntax errors)
 @app.exception_handler(StarletteHTTPException)

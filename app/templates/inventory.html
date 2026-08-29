@@ -1,0 +1,926 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Kho Hàng & Định Mức BOM - VERTEX PCCC &amp; MANUFACTURING</title>
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
+    <link rel="alternate icon" href="/static/images/logo-icon.png">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        :root {
+            --vertex-orange: #FF6600;
+            --vertex-orange-light: #FFF5EB;
+            --vertex-navy: #0F172A;
+            --vertex-blue: #2563EB;
+            --vertex-green: #059669;
+            --vertex-purple: #7C3AED;
+            --vertex-gray-bg: #F8FAFC;
+            --vertex-card-border: #E2E8F0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #F1F5F9;
+            color: #1E293B;
+            margin: 0;
+            padding: 0;
+        }
+
+        /* Top Sub-tabs Bar */
+        .warehouse-subtabs-nav {
+            display: flex;
+            gap: 12px;
+            background: #FFFFFF;
+            padding: 8px 12px;
+            border-radius: 12px;
+            border: 1px solid var(--vertex-card-border);
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .wh-tab-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 14px 20px;
+            border-radius: 10px;
+            border: 1px solid transparent;
+            background: #F8FAFC;
+            color: #475569;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .wh-tab-btn:hover {
+            background: #F1F5F9;
+            color: #0F172A;
+        }
+
+        .wh-tab-btn.active {
+            background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%);
+            color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(255, 102, 0, 0.25);
+        }
+
+        .wh-tab-btn .badge-count {
+            background: rgba(255, 255, 255, 0.25);
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+        }
+
+        .wh-tab-btn:not(.active) .badge-count {
+            background: #E2E8F0;
+            color: #475569;
+        }
+
+        /* Stats Cards */
+        .inv-stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .inv-stat-card {
+            background: #FFFFFF;
+            padding: 18px 20px;
+            border-radius: 12px;
+            border: 1px solid var(--vertex-card-border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.02);
+        }
+
+        .inv-stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            flex-shrink: 0;
+        }
+
+        .inv-stat-info h4 {
+            margin: 0;
+            font-size: 12px;
+            color: #64748B;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .inv-stat-info .stat-val {
+            margin: 4px 0 0 0;
+            font-size: 20px;
+            font-weight: 800;
+            color: #0F172A;
+        }
+
+        /* Toolbar & Filters */
+        .inv-toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            background: #FFFFFF;
+            padding: 14px 18px;
+            border-radius: 12px;
+            border: 1px solid var(--vertex-card-border);
+            margin-bottom: 16px;
+        }
+
+        .inv-search-box {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #F8FAFC;
+            border: 1px solid #CBD5E1;
+            padding: 8px 14px;
+            border-radius: 8px;
+            min-width: 280px;
+        }
+
+        .inv-search-box input {
+            border: none;
+            background: transparent;
+            outline: none;
+            font-size: 13.5px;
+            width: 100%;
+            font-family: inherit;
+        }
+
+        .inv-filter-select {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #CBD5E1;
+            background: #F8FAFC;
+            font-size: 13px;
+            font-family: inherit;
+            outline: none;
+            color: #334155;
+            font-weight: 600;
+        }
+
+        /* Pricing Badge Tags */
+        .badge-price {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            border-radius: 6px;
+            font-size: 12.5px;
+            font-weight: 700;
+            white-space: nowrap;
+        }
+
+        .badge-price.cost {
+            background: #F1F5F9;
+            color: #475569;
+            border: 1px solid #CBD5E1;
+        }
+
+        .badge-price.retail {
+            background: #ECFDF5;
+            color: #059669;
+            border: 1px solid #A7F3D0;
+        }
+
+        .badge-price.dealer {
+            background: #EFF6FF;
+            color: #2563EB;
+            border: 1px solid #BFDBFE;
+        }
+
+        .badge-price.project {
+            background: #F5F3FF;
+            color: #7C3AED;
+            border: 1px solid #DDD6FE;
+        }
+
+        /* Action Buttons */
+        .btn-action-sm {
+            padding: 6px 10px;
+            border-radius: 6px;
+            border: 1px solid #CBD5E1;
+            background: #FFFFFF;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s ease;
+            color: #334155;
+        }
+
+        .btn-action-sm:hover {
+            background: #F8FAFC;
+            border-color: #94A3B8;
+        }
+
+        .btn-action-sm.btn-bom {
+            background: #FFF7ED;
+            color: #EA580C;
+            border-color: #FFEDD5;
+        }
+
+        .btn-action-sm.btn-bom:hover {
+            background: #FFEDD5;
+            border-color: #FDBA74;
+        }
+
+        /* BOM Modal Styles */
+        .bom-breakdown-card {
+            background: #F8FAFC;
+            border: 1px solid #E2E8F0;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .bom-cost-formula-box {
+            background: #0F172A;
+            color: #F8FAFC;
+            padding: 14px 18px;
+            border-radius: 10px;
+            margin-top: 16px;
+            font-family: monospace;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Header Navigation -->
+    <header class="header">
+        <div class="header-container">
+            <div class="logo-group">
+                <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
+                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="header-logo" onerror="this.src='/static/images/logo.svg'">
+                    <div>
+                        <span class="logo-title">VERTEX</span>
+                        <span class="logo-subtitle">PCCC &amp; MANUFACTURING</span>
+                    </div>
+                </a>
+            </div>
+
+            <div class="header-actions">
+                <!-- Navigation Links -->
+                <a href="/" class="btn btn-outline" title="Tổng quan các gói báo giá">
+                    <i class="fa-solid fa-table-list"></i> <span>Tổng Báo Giá</span>
+                </a>
+
+                <a href="/inventory" class="btn btn-primary" style="background:var(--vertex-orange);" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked"></i> <span>Kho &amp; BOM</span>
+                </a>
+
+                <a href="/quote-builder" class="btn btn-outline" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature" style="color:var(--vertex-orange);"></i> <span>Lập Báo Giá</span>
+                </a>
+
+                <a href="/cad-takeoff" class="btn btn-outline" title="Bóc tách bản vẽ CAD/BIM">
+                    <i class="fa-solid fa-layer-group"></i> <span>Bóc Tách CAD</span>
+                </a>
+
+                <a href="/field-reports" class="btn btn-outline" title="Chấm công GPS & Hiện trường">
+                    <i class="fa-solid fa-location-dot" style="color:#10B981;"></i> <span>Hiện Trường</span>
+                </a>
+
+                <a href="/docs" target="_blank" class="btn btn-outline" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code"></i> <span>API Docs</span>
+                </a>
+
+                <!-- User Profile & RBAC Role Chip -->
+                <div class="user-profile-chip">
+                    <div class="user-avatar">
+                        {{ user.full_name[0] if user and user.full_name else 'V' }}
+                    </div>
+                    <div class="user-meta">
+                        <span class="user-name">{{ user.full_name if user else 'Người dùng' }}</span>
+                        <span class="user-role-tag">
+                            <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
+                        </span>
+                    </div>
+                    <a href="/logout" class="btn-logout" title="Đăng xuất">
+                        <i class="fa-solid fa-arrow-right-from-bracket"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="main-container">
+        <!-- Sub-tabs for Warehouse Isolation -->
+        <div class="warehouse-subtabs-nav">
+            <button type="button" class="wh-tab-btn active" id="tab-btn-mfg" onclick="switchWarehouseTab('MANUFACTURING')">
+                <i class="fa-solid fa-industry" style="font-size:18px;"></i>
+                <span>🏭 KHO SẢN XUẤT (Gia Công &amp; Vật Tư Thô)</span>
+                <span class="badge-count">{{ total_mfg_count }}</span>
+            </button>
+            <button type="button" class="wh-tab-btn" id="tab-btn-com" onclick="switchWarehouseTab('COMMERCIAL')">
+                <i class="fa-solid fa-cart-flatbed" style="font-size:18px;"></i>
+                <span>🛒 KHO THƯƠNG MẠI &amp; DỰ ÁN PCCC</span>
+                <span class="badge-count">{{ total_com_count }}</span>
+            </button>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="inv-stats-grid">
+            <div class="inv-stat-card">
+                <div class="inv-stat-icon" style="background:#FFF7ED; color:#EA580C;">
+                    <i class="fa-solid fa-box-open"></i>
+                </div>
+                <div class="inv-stat-info">
+                    <h4>Tổng Mặt Hàng Kho</h4>
+                    <div class="stat-val" id="stat-total-items">{{ total_mfg_count + total_com_count }} SP</div>
+                </div>
+            </div>
+
+            <div class="inv-stat-card">
+                <div class="inv-stat-icon" style="background:#ECFDF5; color:#059669;">
+                    <i class="fa-solid fa-microchip"></i>
+                </div>
+                <div class="inv-stat-info">
+                    <h4>Mục Sản Xuất / BOM</h4>
+                    <div class="stat-val" style="color:#059669;">{{ total_mfg_count }} Mặt hàng</div>
+                </div>
+            </div>
+
+            <div class="inv-stat-card">
+                <div class="inv-stat-icon" style="background:#EFF6FF; color:#2563EB;">
+                    <i class="fa-solid fa-fire-extinguisher"></i>
+                </div>
+                <div class="inv-stat-info">
+                    <h4>Thiết Bị PCCC Thương Mại</h4>
+                    <div class="stat-val" style="color:#2563EB;">{{ total_com_count }} Mặt hàng</div>
+                </div>
+            </div>
+
+            <div class="inv-stat-card">
+                <div class="inv-stat-icon" style="background:#F5F3FF; color:#7C3AED;">
+                    <i class="fa-solid fa-tags"></i>
+                </div>
+                <div class="inv-stat-info">
+                    <h4>Động Cơ Giá 4 Tầng</h4>
+                    <div class="stat-val" style="color:#7C3AED;">Vốn • Lẻ • Đại lý • DA</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search and Action Toolbar -->
+        <div class="inv-toolbar">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                <div class="inv-search-box">
+                    <i class="fa-solid fa-magnifying-glass" style="color:#94A3B8;"></i>
+                    <input type="text" id="inv-search-input" placeholder="Tìm theo SKU, tên vật tư, thông số..." oninput="filterInventoryTable()">
+                </div>
+
+                <!-- Category Filter -->
+                <select id="inv-category-filter" class="inv-filter-select" onchange="filterInventoryTable()">
+                    <option value="">-- Tất cả phân loại --</option>
+                    {% for cat in mfg_categories %}
+                    <option value="{{ cat }}" class="opt-mfg">{{ cat }}</option>
+                    {% endfor %}
+                    {% for cat in com_categories %}
+                    <option value="{{ cat }}" class="opt-com" style="display:none;">{{ cat }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div style="display:flex; align-items:center; gap:10px;">
+                <button type="button" class="btn btn-outline" onclick="openBOMSimulatorModal()" title="Mở máy tính mô phỏng BOM & Giá vốn">
+                    <i class="fa-solid fa-calculator"></i> <span>Mô Phỏng BOM</span>
+                </button>
+                {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
+                <button type="button" class="btn btn-primary" onclick="openAddProductModal()" style="background:var(--vertex-orange);">
+                    <i class="fa-solid fa-plus"></i> <span>Thêm Sản Phẩm Mới</span>
+                </button>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- 1. Data Grid: KHO SẢN XUẤT -->
+        <div id="mfg-warehouse-panel" class="card" style="padding:0; overflow:hidden; border-radius:12px;">
+            <div style="padding:14px 20px; background:#F8FAFC; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:700; color:#0F172A; font-size:14px;">
+                    <i class="fa-solid fa-industry" style="color:var(--vertex-orange); margin-right:6px;"></i>
+                    DANH MỤC VẬT TƯ &amp; THÀNH PHẨM SẢN XUẤT (TÔN, NHÔM, GẦM PIN VINFAST, ỐNG GIÓ, TỦ ĐIỆN)
+                </div>
+                <span class="badge" style="background:#FFF7ED; color:#EA580C; font-weight:700;">{{ total_mfg_count }} Mục</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="table" id="table-mfg" style="margin:0; width:100%; font-size:13px;">
+                    <thead style="background:#F1F5F9; color:#475569; font-weight:700;">
+                        <tr>
+                            <th style="padding:12px 14px;">Mã SKU</th>
+                            <th>Tên Sản Phẩm &amp; Quy Cách</th>
+                            <th>Phân Loại</th>
+                            <th>Tồn Kho</th>
+                            <th>ĐVT</th>
+                            <th style="text-align:right;">🟡 Giá Vốn (BOM)</th>
+                            <th style="text-align:right;">🟢 Giá Lẻ</th>
+                            <th style="text-align:right;">🔵 Giá Đại Lý</th>
+                            <th style="text-align:right;">🟣 CK Dự Án</th>
+                            <th style="text-align:center;">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in mfg_items %}
+                        <tr class="inv-row" data-wh="MANUFACTURING" data-sku="{{ item.sku }}" data-name="{{ item.name }}" data-cat="{{ item.category }}">
+                            <td style="font-weight:800; color:#0F172A; white-space:nowrap;">
+                                <i class="fa-solid fa-barcode" style="color:#94A3B8; margin-right:4px;"></i>
+                                {{ item.sku }}
+                            </td>
+                            <td>
+                                <div style="font-weight:700; color:#0F172A;">{{ item.name }}</div>
+                                {% if item.spec %}
+                                <div style="font-size:11.5px; color:#64748B; margin-top:2px;">{{ item.spec }}</div>
+                                {% endif %}
+                                {% if item.is_custom_dimensions %}
+                                <span class="badge" style="background:#EEF2FF; color:#4F46E5; font-size:10px; padding:2px 6px; margin-top:3px; display:inline-block;">
+                                    <i class="fa-solid fa-ruler-combined"></i> Kích thước linh hoạt
+                                </span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge" style="background:#F8FAFC; border:1px solid #CBD5E1; color:#334155;">{{ item.category }}</span>
+                            </td>
+                            <td style="font-weight:700;">
+                                <span style="color:{{ '#059669' if item.stock_quantity > 50 else '#EA580C' }};">
+                                    {{ "{:,.1f}".format(item.stock_quantity).rstrip('0').rstrip('.') }}
+                                </span>
+                            </td>
+                            <td style="color:#64748B;">{{ item.unit }}</td>
+                            <td style="text-align:right;">
+                                <span class="badge-price cost">{{ "{:,.0f}".format(item.cost_price) }} đ</span>
+                                {% if item.bom_data %}
+                                <button type="button" class="btn-action-sm btn-bom" onclick="viewBOMDetail('{{ item.id }}')" title="Xem chi tiết phân rã BOM" style="margin-left:4px;">
+                                    <i class="fa-solid fa-list-check"></i> BOM
+                                </button>
+                                {% endif %}
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge-price retail">{{ "{:,.0f}".format(item.retail_price) }} đ</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge-price dealer">{{ "{:,.0f}".format(item.dealer_price) }} đ</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge-price project">{{ "{:,.1f}%".format(item.project_discount_rate) }}</span>
+                            </td>
+                            <td style="text-align:center; white-space:nowrap;">
+                                <a href="/quote-builder?add_sku={{ item.sku }}" class="btn-action-sm" style="color:var(--vertex-orange); border-color:#FED7AA;" title="Đưa vào báo giá">
+                                    <i class="fa-solid fa-cart-plus"></i> Báo Giá
+                                </a>
+                                {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
+                                <button type="button" class="btn-action-sm" onclick="editProduct('{{ item.id }}')" title="Chỉnh sửa giá & thông tin">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 2. Data Grid: KHO THƯƠNG MẠI & DỰ ÁN PCCC -->
+        <div id="com-warehouse-panel" class="card" style="display:none; padding:0; overflow:hidden; border-radius:12px;">
+            <div style="padding:14px 20px; background:#F8FAFC; border-bottom:1px solid #E2E8F0; display:flex; justify-content:space-between; align-items:center;">
+                <div style="font-weight:700; color:#0F172A; font-size:14px;">
+                    <i class="fa-solid fa-cart-flatbed" style="color:#2563EB; margin-right:6px;"></i>
+                    DANH MỤC THIẾT BỊ PCCC THƯƠNG MẠI (BÌNH CHỮA CHÁY, ĐẦU PHUN SPRINKLER, VAN, TỦ BÁO CHÁY)
+                </div>
+                <span class="badge" style="background:#EFF6FF; color:#2563EB; font-weight:700;">{{ total_com_count }} Mục</span>
+            </div>
+
+            <div style="overflow-x:auto;">
+                <table class="table" id="table-com" style="margin:0; width:100%; font-size:13px;">
+                    <thead style="background:#F1F5F9; color:#475569; font-weight:700;">
+                        <tr>
+                            <th style="padding:12px 14px;">Mã SKU</th>
+                            <th>Tên Thiết Bị PCCC</th>
+                            <th>Phân Loại</th>
+                            <th>Tồn Kho</th>
+                            <th>ĐVT</th>
+                            <th style="text-align:right;">🟡 Giá Nhập (Vốn)</th>
+                            <th style="text-align:right;">🟢 Giá Lẻ Niêm Yết</th>
+                            <th style="text-align:right;">🔵 Giá Đại Lý</th>
+                            <th style="text-align:right;">🟣 CK Dự Án</th>
+                            <th style="text-align:center;">Thao Tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in com_items %}
+                        <tr class="inv-row" data-wh="COMMERCIAL" data-sku="{{ item.sku }}" data-name="{{ item.name }}" data-cat="{{ item.category }}">
+                            <td style="font-weight:800; color:#0F172A; white-space:nowrap;">
+                                <i class="fa-solid fa-barcode" style="color:#94A3B8; margin-right:4px;"></i>
+                                {{ item.sku }}
+                            </td>
+                            <td>
+                                <div style="font-weight:700; color:#0F172A;">{{ item.name }}</div>
+                                {% if item.spec %}
+                                <div style="font-size:11.5px; color:#64748B; margin-top:2px;">{{ item.spec }}</div>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge" style="background:#F8FAFC; border:1px solid #CBD5E1; color:#334155;">{{ item.category }}</span>
+                            </td>
+                            <td style="font-weight:700;">
+                                <span style="color:{{ '#059669' if item.stock_quantity > 20 else '#EA580C' }};">
+                                    {{ "{:,.0f}".format(item.stock_quantity) }}
+                                </span>
+                            </td>
+                            <td style="color:#64748B;">{{ item.unit }}</td>
+                            <td style="text-align:right;">
+                                <span class="badge-price cost">{{ "{:,.0f}".format(item.cost_price) }} đ</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge-price retail">{{ "{:,.0f}".format(item.retail_price) }} đ</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge-price dealer">{{ "{:,.0f}".format(item.dealer_price) }} đ</span>
+                            </td>
+                            <td style="text-align:right;">
+                                <span class="badge-price project">{{ "{:,.1f}%".format(item.project_discount_rate) }}</span>
+                            </td>
+                            <td style="text-align:center; white-space:nowrap;">
+                                <a href="/quote-builder?add_sku={{ item.sku }}" class="btn-action-sm" style="color:#2563EB; border-color:#BFDBFE;" title="Đưa vào báo giá">
+                                    <i class="fa-solid fa-cart-plus"></i> Báo Giá
+                                </a>
+                                {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
+                                <button type="button" class="btn-action-sm" onclick="editProduct('{{ item.id }}')" title="Chỉnh sửa giá & thông tin">
+                                    <i class="fa-solid fa-pen-to-square"></i>
+                                </button>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal: Chi Tiết Phân Rã BOM Sản Xuất -->
+    <div id="bomDetailModal" class="modal">
+        <div class="modal-content" style="max-width:720px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-network-wired" style="color:var(--vertex-orange);"></i> BÓC TÁCH ĐỊNH MỨC BOM SẢN XUẤT</h3>
+                <button type="button" class="btn-close" onclick="closeBOMDetailModal()">&times;</button>
+            </div>
+            <div class="modal-body" id="bom-detail-body">
+                <!-- Dynamic Content Loaded via JS -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline" onclick="closeBOMDetailModal()">Đóng</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal: Thêm / Sửa Sản Phẩm & 4 Tầng Giá -->
+    <div id="productEditModal" class="modal">
+        <div class="modal-content" style="max-width:780px;">
+            <div class="modal-header">
+                <h3 id="product-modal-title"><i class="fa-solid fa-box" style="color:var(--vertex-orange);"></i> THÊM MỚI SẢN PHẨM &amp; CẤU HÌNH GIÁ 4 TẦNG</h3>
+                <button type="button" class="btn-close" onclick="closeProductModal()">&times;</button>
+            </div>
+            <form id="product-form" onsubmit="handleSaveProduct(event)">
+                <input type="hidden" id="prod-id" value="">
+                <div class="modal-body">
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Kho Lưu Trữ <span style="color:#EF4444;">*</span></label>
+                            <select id="prod-warehouse" class="input-field" required onchange="toggleFormWarehouseType()">
+                                <option value="MANUFACTURING">🏭 Kho Sản Xuất (Gia Công &amp; Vật Tư Thô)</option>
+                                <option value="COMMERCIAL">🛒 Kho Thương Mại &amp; Dự Án PCCC</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Mã SKU <span style="color:#EF4444;">*</span></label>
+                            <input type="text" id="prod-sku" class="input-field" required placeholder="VD: VTX-MFG-EV-VF8">
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Tên Sản Phẩm / Thiết Bị <span style="color:#EF4444;">*</span></label>
+                        <input type="text" id="prod-name" class="input-field" required placeholder="VD: Tấm ốp bảo vệ gầm pin xe điện VinFast VF8 (Nhôm AL5052 3.0mm)">
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:2fr 1fr 1fr; gap:12px; margin-bottom:16px;">
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Phân Loại</label>
+                            <input type="text" id="prod-category" class="input-field" required placeholder="VD: Tấm ốp gầm pin xe điện VinFast">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Đơn Vị Tính</label>
+                            <input type="text" id="prod-unit" class="input-field" required placeholder="tấm / cái / m2 / kg">
+                        </div>
+                        <div>
+                            <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Số Lượng Tồn</label>
+                            <input type="number" id="prod-stock" class="input-field" step="any" required value="100">
+                        </div>
+                    </div>
+
+                    <!-- 4-Tier Pricing Grid Box -->
+                    <div style="background:#F8FAFC; border:1px solid #CBD5E1; border-radius:10px; padding:14px; margin-bottom:16px;">
+                        <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+                            <i class="fa-solid fa-coins" style="color:var(--vertex-orange);"></i> CẤU HÌNH HỆ THỐNG GIÁ 4 TẦNG (MULTI-TIER PRICING)
+                        </div>
+                        <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                            <div>
+                                <label style="font-size:12px; font-weight:700; color:#475569;">🟡 1. Giá Vốn Xuất Xưởng / Nhập (VNĐ)</label>
+                                <input type="number" id="prod-cost" class="input-field" required placeholder="4850000" oninput="autoCalculateSuggestedTiers()">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; font-weight:700; color:#059669;">🟢 2. Giá Lẻ Niêm Yết (VNĐ)</label>
+                                <input type="number" id="prod-retail" class="input-field" required placeholder="7500000">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; font-weight:700; color:#2563EB;">🔵 3. Giá Bán Cho Đại Lý (VNĐ)</label>
+                                <input type="number" id="prod-dealer" class="input-field" required placeholder="6200000">
+                            </div>
+                            <div>
+                                <label style="font-size:12px; font-weight:700; color:#7C3AED;">🟣 4. Chiết Khấu Dự Án PCCC (%)</label>
+                                <input type="number" id="prod-project-disc" class="input-field" step="0.5" required placeholder="10.0" value="8.0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Thông Số Kỹ Thuật &amp; Ghi Chú</label>
+                        <textarea id="prod-spec" class="input-field" rows="2" placeholder="Tiêu chuẩn kỹ thuật, vật liệu hợp kim, ghi chú gia công..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-outline" onclick="closeProductModal()">Hủy</button>
+                    <button type="submit" class="btn btn-primary" style="background:var(--vertex-orange);"><i class="fa-solid fa-floppy-disk"></i> Lưu Sản Phẩm</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        let currentWhTab = 'MANUFACTURING';
+
+        function showToast(msg, type = 'info') {
+            const toast = document.getElementById('toast');
+            toast.textContent = msg;
+            toast.className = `toast show ${type}`;
+            setTimeout(() => { toast.className = 'toast'; }, 3500);
+        }
+
+        function switchWarehouseTab(tab) {
+            currentWhTab = tab;
+            const btnMfg = document.getElementById('tab-btn-mfg');
+            const btnCom = document.getElementById('tab-btn-com');
+            const pnlMfg = document.getElementById('mfg-warehouse-panel');
+            const pnlCom = document.getElementById('com-warehouse-panel');
+            const catFilter = document.getElementById('inv-category-filter');
+
+            if (tab === 'MANUFACTURING') {
+                btnMfg.classList.add('active');
+                btnCom.classList.remove('active');
+                pnlMfg.style.display = 'block';
+                pnlCom.style.display = 'none';
+                document.querySelectorAll('.opt-mfg').forEach(el => el.style.display = 'block');
+                document.querySelectorAll('.opt-com').forEach(el => el.style.display = 'none');
+            } else {
+                btnCom.classList.add('active');
+                btnMfg.classList.remove('active');
+                pnlCom.style.display = 'block';
+                pnlMfg.style.display = 'none';
+                document.querySelectorAll('.opt-mfg').forEach(el => el.style.display = 'none');
+                document.querySelectorAll('.opt-com').forEach(el => el.style.display = 'block');
+            }
+            catFilter.value = '';
+            filterInventoryTable();
+        }
+
+        function filterInventoryTable() {
+            const kw = document.getElementById('inv-search-input').value.toLowerCase().trim();
+            const cat = document.getElementById('inv-category-filter').value;
+            const rows = document.querySelectorAll(`.inv-row[data-wh="${currentWhTab}"]`);
+
+            rows.forEach(r => {
+                const sku = (r.getAttribute('data-sku') || '').toLowerCase();
+                const name = (r.getAttribute('data-name') || '').toLowerCase();
+                const rCat = r.getAttribute('data-cat') || '';
+
+                const matchKw = !kw || sku.includes(kw) || name.includes(kw);
+                const matchCat = !cat || rCat === cat;
+
+                if (matchKw && matchCat) {
+                    r.style.display = '';
+                } else {
+                    r.style.display = 'none';
+                }
+            });
+        }
+
+        async function viewBOMDetail(itemId) {
+            try {
+                const resp = await fetch(`/api/inventory/items/${itemId}`);
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Không thể tải chi tiết BOM');
+
+                const item = data.item;
+                const bom = item.bom_data;
+                const body = document.getElementById('bom-detail-body');
+
+                if (!bom || !bom.raw_materials || bom.raw_materials.length === 0) {
+                    body.innerHTML = `<div style="padding:20px; text-align:center; color:#64748B;">Sản phẩm chưa cấu hình danh sách vật tư BOM chi tiết.</div>`;
+                    document.getElementById('bomDetailModal').style.display = 'block';
+                    return;
+                }
+
+                let rmRows = '';
+                bom.raw_materials.forEach((rm, idx) => {
+                    rmRows += `
+                        <tr>
+                            <td style="padding:8px 10px; font-weight:700;">${idx + 1}. ${rm.material_name}</td>
+                            <td style="font-size:11.5px; color:#64748B;">${rm.spec || '-'}</td>
+                            <td>${rm.quantity} ${rm.unit}</td>
+                            <td style="text-align:right;">${(rm.unit_cost || 0).toLocaleString()} đ</td>
+                            <td style="text-align:right; font-weight:700; color:#0F172A;">${(rm.total_cost || 0).toLocaleString()} đ</td>
+                        </tr>
+                    `;
+                });
+
+                body.innerHTML = `
+                    <div style="margin-bottom:14px;">
+                        <h4 style="margin:0; font-size:15px; color:#0F172A;">${item.name}</h4>
+                        <span style="font-size:12px; color:#64748B;">Mã SKU: <b>${item.sku}</b> | Phân loại: <b>${item.category}</b></span>
+                    </div>
+
+                    <div class="bom-breakdown-card">
+                        <div style="font-size:13px; font-weight:800; color:#0F172A; margin-bottom:8px;">1. BẢNG KÊ NGUYÊN VẬT LIỆU THÔ (RAW MATERIALS)</div>
+                        <table style="width:100%; border-collapse:collapse; font-size:12.5px;">
+                            <thead>
+                                <tr style="background:#E2E8F0; text-align:left; color:#475569;">
+                                    <th style="padding:6px 10px;">Vật liệu</th>
+                                    <th>Quy cách</th>
+                                    <th>Định mức</th>
+                                    <th style="text-align:right;">Đơn giá</th>
+                                    <th style="text-align:right;">Thành tiền</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rmRows}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
+                        <div style="background:#FFF7ED; padding:12px; border-radius:8px; border:1px solid #FFEDD5;">
+                            <div style="font-size:11.5px; color:#C2410C; font-weight:700;">Hao hụt & Phế liệu (${((bom.scrap_waste_ratio || 0.05)*100).toFixed(0)}%)</div>
+                            <div style="font-size:16px; font-weight:800; color:#EA580C; margin-top:2px;">+${(bom.scrap_waste_cost || 0).toLocaleString()} đ</div>
+                        </div>
+                        <div style="background:#EFF6FF; padding:12px; border-radius:8px; border:1px solid #DBEAFE;">
+                            <div style="font-size:11.5px; color:#1E40AF; font-weight:700;">Nhân công &amp; Chi phí máy</div>
+                            <div style="font-size:16px; font-weight:800; color:#2563EB; margin-top:2px;">+${((bom.labor_cost || 0) + (bom.overhead_cost || 0)).toLocaleString()} đ</div>
+                        </div>
+                    </div>
+
+                    <div class="bom-cost-formula-box">
+                        <div><b>TỔNG GIÁ VỐN NHÀ MÁY (REAL COST BASE):</b></div>
+                        <div style="font-size:18px; font-weight:800; color:#34D399; margin:4px 0;">= ${(item.cost_price || 0).toLocaleString()} VNĐ / ${item.unit}</div>
+                        <div style="font-size:11px; color:#94A3B8;">= [Tiền Vật Tư (${(bom.raw_material_cost || 0).toLocaleString()} đ) &times; 1.${((bom.scrap_waste_ratio || 0.05)*100).toFixed(0)}] + Nhân Công (${(bom.labor_cost || 0).toLocaleString()} đ) + Chi Phí Quản Lý (${(bom.overhead_cost || 0).toLocaleString()} đ)</div>
+                    </div>
+                `;
+
+                document.getElementById('bomDetailModal').style.display = 'block';
+
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function closeBOMDetailModal() {
+            document.getElementById('bomDetailModal').style.display = 'none';
+        }
+
+        function openAddProductModal() {
+            document.getElementById('product-modal-title').innerHTML = `<i class="fa-solid fa-plus" style="color:var(--vertex-orange);"></i> THÊM MỚI SẢN PHẨM &amp; CẤU HÌNH GIÁ 4 TẦNG`;
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prod-warehouse').value = currentWhTab;
+            document.getElementById('prod-sku').value = '';
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-category').value = '';
+            document.getElementById('prod-unit').value = 'cái';
+            document.getElementById('prod-stock').value = '100';
+            document.getElementById('prod-cost').value = '';
+            document.getElementById('prod-retail').value = '';
+            document.getElementById('prod-dealer').value = '';
+            document.getElementById('prod-project-disc').value = '8.0';
+            document.getElementById('prod-spec').value = '';
+            document.getElementById('productEditModal').style.display = 'block';
+        }
+
+        async function editProduct(itemId) {
+            try {
+                const resp = await fetch(`/api/inventory/items/${itemId}`);
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Không thể tải thông tin sản phẩm');
+
+                const item = data.item;
+                document.getElementById('product-modal-title').innerHTML = `<i class="fa-solid fa-pen-to-square" style="color:var(--vertex-orange);"></i> CHỈNH SỬA SẢN PHẨM [${item.sku}]`;
+                document.getElementById('prod-id').value = item.id;
+                document.getElementById('prod-warehouse').value = item.warehouse_type;
+                document.getElementById('prod-sku').value = item.sku;
+                document.getElementById('prod-name').value = item.name;
+                document.getElementById('prod-category').value = item.category;
+                document.getElementById('prod-unit').value = item.unit;
+                document.getElementById('prod-stock').value = item.stock_quantity;
+                document.getElementById('prod-cost').value = item.cost_price;
+                document.getElementById('prod-retail').value = item.retail_price;
+                document.getElementById('prod-dealer').value = item.dealer_price;
+                document.getElementById('prod-project-disc').value = item.project_discount_rate;
+                document.getElementById('prod-spec').value = item.spec;
+
+                document.getElementById('productEditModal').style.display = 'block';
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+
+        function closeProductModal() {
+            document.getElementById('productEditModal').style.display = 'none';
+        }
+
+        function autoCalculateSuggestedTiers() {
+            const cost = parseFloat(document.getElementById('prod-cost').value) || 0;
+            if (cost > 0) {
+                document.getElementById('prod-retail').value = Math.round(cost * 1.35 / 1000) * 1000;
+                document.getElementById('prod-dealer').value = Math.round(cost * 1.18 / 1000) * 1000;
+            }
+        }
+
+        async function handleSaveProduct(e) {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const payload = {
+                warehouse_type: document.getElementById('prod-warehouse').value,
+                sku: document.getElementById('prod-sku').value.trim(),
+                name: document.getElementById('prod-name').value.trim(),
+                category: document.getElementById('prod-category').value.trim(),
+                unit: document.getElementById('prod-unit').value.trim(),
+                stock_quantity: parseFloat(document.getElementById('prod-stock').value) || 0,
+                cost_price: parseFloat(document.getElementById('prod-cost').value) || 0,
+                retail_price: parseFloat(document.getElementById('prod-retail').value) || 0,
+                dealer_price: parseFloat(document.getElementById('prod-dealer').value) || 0,
+                project_discount_rate: parseFloat(document.getElementById('prod-project-disc').value) || 0,
+                spec: document.getElementById('prod-spec').value.trim()
+            };
+
+            try {
+                let resp;
+                if (id) {
+                    resp = await fetch(`/api/inventory/items/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                } else {
+                    resp = await fetch('/api/inventory/items', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                }
+
+                const data = await resp.json();
+                if (!resp.ok) throw new Error(data.detail || 'Lưu sản phẩm thất bại');
+
+                showToast(data.message || 'Lưu sản phẩm thành công!', 'success');
+                closeProductModal();
+                setTimeout(() => { window.location.reload(); }, 800);
+
+            } catch (err) {
+                showToast(err.message, 'error');
+            }
+        }
+    </script>
+</body>
+</html>
