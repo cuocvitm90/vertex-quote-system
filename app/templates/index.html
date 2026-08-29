@@ -48,47 +48,52 @@
                     </select>
                 </div>
 
+                <!-- Navigation Buttons with Distinct Contrast & Tactile Design -->
+                <a href="/" class="btn active" title="Tổng quan các gói báo giá">
+                    <i class="fa-solid fa-table-list" style="color:#FFFFFF;"></i> <span>Tổng Báo Giá</span>
+                </a>
+
                 <!-- Inventory & Manufacturing BOM Button -->
-                <a href="/inventory" class="btn btn-outline" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
-                    <i class="fa-solid fa-boxes-stacked" style="color:var(--vertex-orange-main);"></i> <span>Kho &amp; BOM</span>
+                <a href="/inventory" class="btn" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked" style="color:#F59E0B;"></i> <span>Kho &amp; BOM</span>
                 </a>
 
                 <!-- Interactive Quote Builder Button -->
-                <a href="/quote-builder" class="btn btn-outline" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
-                    <i class="fa-solid fa-file-signature" style="color:var(--vertex-orange-main);"></i> <span>Lập Báo Giá</span>
+                <a href="/quote-builder" class="btn" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature" style="color:#FF8533;"></i> <span>Lập Báo Giá</span>
                 </a>
 
                 <!-- Master Template & Coefficients Button -->
-                <button class="btn btn-outline" onclick="openMasterTemplateModal()" title="Quản lý File Mẫu Chuẩn & Khung Tỷ Lệ Định Mức">
-                    <i class="fa-solid fa-file-invoice"></i> <span>File Mẫu &amp; Hệ Số</span>
+                <button type="button" class="btn" onclick="openMasterTemplateModal()" title="Quản lý File Mẫu Chuẩn & Khung Tỷ Lệ Định Mức">
+                    <i class="fa-solid fa-file-invoice" style="color:#F472B6;"></i> <span>File Mẫu &amp; Hệ Số</span>
                 </button>
 
                 <!-- User Guide Button -->
-                <button class="btn btn-outline" onclick="openUserGuideModal()" title="Hướng dẫn sử dụng quy trình báo giá 4 bước Vertex">
-                    <i class="fa-solid fa-book-open"></i> <span data-i18n="nav_user_guide">Hướng Dẫn</span>
+                <button type="button" class="btn" onclick="openUserGuideModal()" title="Hướng dẫn sử dụng quy trình báo giá 4 bước Vertex">
+                    <i class="fa-solid fa-book-open" style="color:#60A5FA;"></i> <span data-i18n="nav_user_guide">Hướng Dẫn</span>
                 </button>
 
                 <!-- CAD & Revit Takeoff Add-on Button -->
-                <a href="/cad-takeoff" class="btn btn-outline" title="Bóc tách khối lượng từ bản vẽ CAD (.dxf, .dwg) & Revit BIM">
-                    <i class="fa-solid fa-layer-group" style="color:var(--vertex-orange-main);"></i> <span data-i18n="nav_cad_takeoff">Bóc Tách CAD/Revit</span>
+                <a href="/cad-takeoff" class="btn" title="Bóc tách khối lượng từ bản vẽ CAD (.dxf, .dwg) & Revit BIM">
+                    <i class="fa-solid fa-layer-group" style="color:#A78BFA;"></i> <span data-i18n="nav_cad_takeoff">Bóc Tách CAD/Revit</span>
                 </a>
 
                 <!-- Field Reports & GPS Attendance Add-on Button -->
-                <a href="/field-reports" class="btn btn-outline" title="Chấm công GPS & Quản lý báo cáo công việc hiện trường">
-                    <i class="fa-solid fa-location-dot" style="color:#10B981;"></i> <span data-i18n="nav_field_report">Chấm Công & Báo Cáo</span>
+                <a href="/field-reports" class="btn" title="Chấm công GPS & Quản lý báo cáo công việc hiện trường">
+                    <i class="fa-solid fa-location-dot" style="color:#34D399;"></i> <span data-i18n="nav_field_report">Chấm Công & Báo Cáo</span>
                 </a>
 
                 {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
-                <button class="btn btn-outline" onclick="openUserManagementModal()" title="Quản trị người dùng & Phân quyền">
-                    <i class="fa-solid fa-users-gear"></i> <span data-i18n="nav_user_mgmt">Quản Trị User</span>
+                <button type="button" class="btn" onclick="openUserManagementModal()" title="Quản trị người dùng & Phân quyền">
+                    <i class="fa-solid fa-users-gear" style="color:#FBBF24;"></i> <span data-i18n="nav_user_mgmt">Quản Trị User</span>
                 </button>
                 {% endif %}
 
-                <a href="/docs" target="_blank" class="btn btn-outline" title="Tài liệu API Swagger">
-                    <i class="fa-solid fa-code"></i> <span data-i18n="nav_api_docs">API Docs</span>
+                <a href="/docs" target="_blank" class="btn" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code" style="color:#94A3B8;"></i> <span data-i18n="nav_api_docs">API Docs</span>
                 </a>
 
-                <button class="btn btn-primary" onclick="scrollToUpload()">
+                <button type="button" class="btn btn-primary" onclick="scrollToUpload()" style="background:linear-gradient(135deg, #FF6600 0%, #FF8533 100%);">
                     <i class="fa-solid fa-plus"></i> <span data-i18n="nav_create_quote">Tạo Báo Giá Mới</span>
                 </button>
 

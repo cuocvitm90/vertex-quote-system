@@ -197,43 +197,42 @@
         }
     </style>
 </head>
-<body>
-    <!-- Top Header Navigation -->
-    <header class="header">
+    <!-- Top Header Navigation (High-Contrast & Tactile UI) -->
+    <header class="app-header">
         <div class="header-container">
             <div class="logo-group">
                 <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
-                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="header-logo" onerror="this.src='/static/images/logo.svg'">
+                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="brand-logo-img" onerror="this.src='/static/images/logo-white.svg'">
                     <div>
-                        <span class="logo-title">VERTEX</span>
-                        <span class="logo-subtitle">PCCC &amp; MANUFACTURING</span>
+                        <span style="font-size:15px; font-weight:800; color:#FFFFFF; letter-spacing:0.5px; display:block; line-height:1.1;">VERTEX</span>
+                        <span style="font-size:9.5px; font-weight:700; color:var(--vertex-orange-main); letter-spacing:0.3px;">PCCC &amp; MANUFACTURING</span>
                     </div>
                 </a>
             </div>
 
             <div class="header-actions">
-                <a href="/" class="btn btn-outline" title="Tổng quan các gói báo giá">
-                    <i class="fa-solid fa-table-list"></i> <span>Tổng Báo Giá</span>
+                <a href="/" class="btn" title="Tổng quan các gói báo giá">
+                    <i class="fa-solid fa-table-list" style="color:#60A5FA;"></i> <span>Tổng Báo Giá</span>
                 </a>
 
-                <a href="/inventory" class="btn btn-outline" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
-                    <i class="fa-solid fa-boxes-stacked" style="color:var(--vertex-orange);"></i> <span>Kho &amp; BOM</span>
+                <a href="/inventory" class="btn" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked" style="color:#F59E0B;"></i> <span>Kho &amp; BOM</span>
                 </a>
 
-                <a href="/quote-builder" class="btn btn-primary" style="background:var(--vertex-orange);" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
-                    <i class="fa-solid fa-file-signature"></i> <span>Lập Báo Giá</span>
+                <a href="/quote-builder" class="btn active" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature" style="color:#FFFFFF;"></i> <span>Lập Báo Giá</span>
                 </a>
 
-                <a href="/cad-takeoff" class="btn btn-outline" title="Bóc tách bản vẽ CAD/BIM">
-                    <i class="fa-solid fa-layer-group"></i> <span>Bóc Tách CAD</span>
+                <a href="/cad-takeoff" class="btn" title="Bóc tách bản vẽ CAD/BIM">
+                    <i class="fa-solid fa-layer-group" style="color:#A78BFA;"></i> <span>Bóc Tách CAD</span>
                 </a>
 
-                <a href="/field-reports" class="btn btn-outline" title="Chấm công GPS & Hiện trường">
-                    <i class="fa-solid fa-location-dot" style="color:#10B981;"></i> <span>Hiện Trường</span>
+                <a href="/field-reports" class="btn" title="Chấm công GPS & Hiện trường">
+                    <i class="fa-solid fa-location-dot" style="color:#34D399;"></i> <span>Hiện Trường</span>
                 </a>
 
-                <a href="/docs" target="_blank" class="btn btn-outline" title="Tài liệu API Swagger">
-                    <i class="fa-solid fa-code"></i> <span>API Docs</span>
+                <a href="/docs" target="_blank" class="btn" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code" style="color:#94A3B8;"></i> <span>API Docs</span>
                 </a>
 
                 <!-- User Profile & RBAC Role Chip -->
@@ -412,6 +411,18 @@
             </div>
         </div>
     </main>
+
+    <!-- Persistent Floating Action Bar (Never Disappears) -->
+    <div class="floating-fab-container">
+        <button type="button" class="fab-btn fab-primary" onclick="addNewLineItem()" title="Thêm dòng sản phẩm mới">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ Thêm Dòng</span>
+        </button>
+        <button type="button" class="fab-btn fab-secondary" onclick="submitSaveQuote()" title="Lưu và tải file Excel">
+            <i class="fa-solid fa-floppy-disk" style="color:var(--vertex-orange-main);"></i>
+            <span>Lưu &amp; Xuất Excel</span>
+        </button>
+    </div>
 
     <!-- Toast Notification -->
     <div id="toast" class="toast"></div>

@@ -159,27 +159,75 @@ html, body {
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
     flex-shrink: 1;
     min-width: 0;
     flex-wrap: nowrap;
 }
 
-.header-actions .btn {
-    height: 34px;
-    padding: 0 9px;
-    font-size: 11.5px;
-    font-weight: 600;
-    border-radius: var(--radius-sm);
+.header-actions .btn,
+.nav-btn {
+    height: 36px;
+    padding: 0 12px;
+    font-size: 12px;
+    font-weight: 700;
+    font-family: inherit;
+    border-radius: 8px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 5px;
+    gap: 6px;
     white-space: nowrap;
     box-sizing: border-box;
     line-height: 1;
     margin: 0;
     flex-shrink: 0;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    background: #1E293B;
+    color: #F8FAFC !important;
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+.header-actions .btn i,
+.nav-btn i {
+    font-size: 13px;
+    transition: transform 0.2s ease;
+}
+
+.header-actions .btn:hover,
+.nav-btn:hover {
+    background: #334155 !important;
+    border-color: var(--vertex-orange-main) !important;
+    color: #FFFFFF !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 102, 0, 0.35);
+}
+
+.header-actions .btn:hover i,
+.nav-btn:hover i {
+    transform: scale(1.15);
+}
+
+.header-actions .btn.active,
+.header-actions .btn.btn-primary,
+.nav-btn.active {
+    background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%) !important;
+    border-color: #FF8533 !important;
+    color: #FFFFFF !important;
+    box-shadow: 0 4px 14px rgba(255, 102, 0, 0.45) !important;
+    font-weight: 800;
+}
+
+.header-actions .btn.active:hover,
+.header-actions .btn.btn-primary:hover,
+.nav-btn.active:hover {
+    background: linear-gradient(135deg, #FF7D47 0%, #FFA07A 100%) !important;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(255, 102, 0, 0.55) !important;
 }
 
 /* --------------------------------------------------
@@ -340,13 +388,97 @@ html, body {
 }
 
 /* --------------------------------------------------
+   Floating Persistent Quick Action Buttons (Never Disappears)
+   -------------------------------------------------- */
+.floating-fab-container {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    z-index: 995;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.fab-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 18px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25), 0 2px 6px rgba(0, 0, 0, 0.15);
+    transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    user-select: none;
+    text-decoration: none;
+}
+
+.fab-primary {
+    background: linear-gradient(135deg, #FF6600 0%, #FF8533 100%);
+    color: #FFFFFF !important;
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 24px rgba(255, 102, 0, 0.4);
+}
+
+.fab-primary:hover {
+    background: linear-gradient(135deg, #FF7D47 0%, #FFA07A 100%);
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 12px 30px rgba(255, 102, 0, 0.55);
+}
+
+.fab-secondary {
+    background: #0F172A;
+    color: #F8FAFC !important;
+    border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.fab-secondary:hover {
+    background: #1E293B;
+    border-color: var(--vertex-orange-main);
+    color: #FFFFFF !important;
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
+}
+
+/* Persistent Modal Minimized Dock / Recovery Bar */
+.modal-dock-bar {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 990;
+    background: #0F172A;
+    border: 2px solid #FF6600;
+    border-radius: 999px;
+    padding: 8px 18px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4), 0 0 20px rgba(255, 102, 0, 0.25);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: #FFFFFF;
+    font-size: 13px;
+    font-weight: 700;
+    animation: dockSlideUp 0.3s ease;
+}
+
+@keyframes dockSlideUp {
+    from { transform: translate(-50%, 40px); opacity: 0; }
+    to { transform: translate(-50%, 0); opacity: 1; }
+}
+
+/* --------------------------------------------------
    Floating Author & Support Footer (Bottom Right)
    -------------------------------------------------- */
 .author-floating-footer {
     position: fixed;
     bottom: 15px;
-    right: 20px;
-    z-index: 999;
+    left: 20px;
+    z-index: 990;
     display: inline-flex;
     align-items: center;
     gap: 8px;

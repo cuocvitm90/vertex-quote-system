@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản Lý Kho Hàng & Định Mức BOM - VERTEX PCCC &amp; MANUFACTURING</title>
+    <title>Quản Lý Kho Hàng &amp; Định Mức BOM - VERTEX PCCC &amp; MANUFACTURING</title>
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="/static/images/favicon.svg">
     <link rel="alternate icon" href="/static/images/logo-icon.png">
@@ -22,7 +22,7 @@
             --vertex-green: #059669;
             --vertex-purple: #7C3AED;
             --vertex-gray-bg: #F8FAFC;
-            --vertex-card-border: #E2E8F0;
+            --vertex-card-border: #CBD5E1;
         }
 
         body {
@@ -266,43 +266,43 @@
     </style>
 </head>
 <body>
-    <!-- Top Header Navigation -->
-    <header class="header">
+    <!-- Top Header Navigation (High-Contrast & Tactile UI) -->
+    <header class="app-header">
         <div class="header-container">
             <div class="logo-group">
                 <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
-                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="header-logo" onerror="this.src='/static/images/logo.svg'">
+                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="brand-logo-img" onerror="this.src='/static/images/logo-white.svg'">
                     <div>
-                        <span class="logo-title">VERTEX</span>
-                        <span class="logo-subtitle">PCCC &amp; MANUFACTURING</span>
+                        <span style="font-size:15px; font-weight:800; color:#FFFFFF; letter-spacing:0.5px; display:block; line-height:1.1;">VERTEX</span>
+                        <span style="font-size:9.5px; font-weight:700; color:var(--vertex-orange-main); letter-spacing:0.3px;">PCCC &amp; MANUFACTURING</span>
                     </div>
                 </a>
             </div>
 
             <div class="header-actions">
-                <!-- Navigation Links -->
-                <a href="/" class="btn btn-outline" title="Tổng quan các gói báo giá">
-                    <i class="fa-solid fa-table-list"></i> <span>Tổng Báo Giá</span>
+                <!-- Navigation Buttons with Distinct Contrast & Tactile Design -->
+                <a href="/" class="btn" title="Tổng quan các gói báo giá">
+                    <i class="fa-solid fa-table-list" style="color:#60A5FA;"></i> <span>Tổng Báo Giá</span>
                 </a>
 
-                <a href="/inventory" class="btn btn-primary" style="background:var(--vertex-orange);" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
-                    <i class="fa-solid fa-boxes-stacked"></i> <span>Kho &amp; BOM</span>
+                <a href="/inventory" class="btn active" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                    <i class="fa-solid fa-boxes-stacked" style="color:#FFFFFF;"></i> <span>Kho &amp; BOM</span>
                 </a>
 
-                <a href="/quote-builder" class="btn btn-outline" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
-                    <i class="fa-solid fa-file-signature" style="color:var(--vertex-orange);"></i> <span>Lập Báo Giá</span>
+                <a href="/quote-builder" class="btn" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                    <i class="fa-solid fa-file-signature" style="color:#FF8533;"></i> <span>Lập Báo Giá</span>
                 </a>
 
-                <a href="/cad-takeoff" class="btn btn-outline" title="Bóc tách bản vẽ CAD/BIM">
-                    <i class="fa-solid fa-layer-group"></i> <span>Bóc Tách CAD</span>
+                <a href="/cad-takeoff" class="btn" title="Bóc tách bản vẽ CAD/BIM">
+                    <i class="fa-solid fa-layer-group" style="color:#A78BFA;"></i> <span>Bóc Tách CAD</span>
                 </a>
 
-                <a href="/field-reports" class="btn btn-outline" title="Chấm công GPS & Hiện trường">
-                    <i class="fa-solid fa-location-dot" style="color:#10B981;"></i> <span>Hiện Trường</span>
+                <a href="/field-reports" class="btn" title="Chấm công GPS & Hiện trường">
+                    <i class="fa-solid fa-location-dot" style="color:#34D399;"></i> <span>Hiện Trường</span>
                 </a>
 
-                <a href="/docs" target="_blank" class="btn btn-outline" title="Tài liệu API Swagger">
-                    <i class="fa-solid fa-code"></i> <span>API Docs</span>
+                <a href="/docs" target="_blank" class="btn" title="Tài liệu API Swagger">
+                    <i class="fa-solid fa-code" style="color:#94A3B8;"></i> <span>API Docs</span>
                 </a>
 
                 <!-- User Profile & RBAC Role Chip -->
@@ -404,12 +404,12 @@
             </div>
 
             <div style="display:flex; align-items:center; gap:10px;">
-                <button type="button" class="btn btn-outline" onclick="openBOMSimulatorModal()" title="Mở máy tính mô phỏng BOM & Giá vốn">
-                    <i class="fa-solid fa-calculator"></i> <span>Mô Phỏng BOM</span>
+                <button type="button" class="btn btn-outline-dark" onclick="openBOMSimulatorModal()" title="Mở máy tính mô phỏng BOM & Giá vốn" style="background:#FFFFFF; border:1px solid #CBD5E1; color:#0F172A; font-weight:700; padding:8px 14px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer;">
+                    <i class="fa-solid fa-calculator" style="color:var(--vertex-orange);"></i> <span>Mô Phỏng BOM</span>
                 </button>
                 {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
-                <button type="button" class="btn btn-primary" onclick="openAddProductModal()" style="background:var(--vertex-orange);">
-                    <i class="fa-solid fa-plus"></i> <span>Thêm Sản Phẩm Mới</span>
+                <button type="button" class="btn btn-primary" onclick="openAddProductModal()" style="background:var(--vertex-orange); color:#FFFFFF; font-weight:800; padding:8px 16px; border-radius:8px; display:inline-flex; align-items:center; gap:6px; cursor:pointer; border:none;">
+                    <i class="fa-solid fa-plus"></i> <span>+ Thêm Sản Phẩm Mới</span>
                 </button>
                 {% endif %}
             </div>
@@ -580,6 +580,30 @@
         </div>
     </main>
 
+    <!-- Persistent Floating Action Bar (Never Disappears - Instant Reopen Form / BOM) -->
+    <div class="floating-fab-container">
+        {% if user and user.role.value in ['ADMIN', 'MANAGER'] %}
+        <button type="button" class="fab-btn fab-primary" onclick="openAddProductModal()" title="Mở Form Thêm Sản Phẩm Mới &amp; Định Mức BOM">
+            <i class="fa-solid fa-plus"></i>
+            <span>+ Thêm Sản Phẩm</span>
+        </button>
+        {% endif %}
+        <button type="button" class="fab-btn fab-secondary" onclick="openBOMSimulatorModal()" title="Mở Máy Tính Mô Phỏng Định Mức BOM">
+            <i class="fa-solid fa-calculator" style="color:var(--vertex-orange-main);"></i>
+            <span>Máy Tính BOM</span>
+        </button>
+    </div>
+
+    <!-- Persistent Form Minimized Recovery Dock -->
+    <div id="modalRecoveryDock" class="modal-dock-bar" style="display:none;">
+        <i class="fa-solid fa-pen-ruler" style="color:var(--vertex-orange);"></i>
+        <span id="dock-status-text">Đang có dữ liệu form sản phẩm chưa lưu.</span>
+        <button type="button" class="btn btn-primary" onclick="resumeDraftProductModal()" style="background:var(--vertex-orange); padding:4px 12px; font-size:12px; border-radius:6px; border:none; cursor:pointer;">
+            <i class="fa-solid fa-up-right-from-square"></i> Mở Lại Ngay
+        </button>
+        <button type="button" onclick="dismissRecoveryDock()" style="background:transparent; border:none; color:#94A3B8; cursor:pointer; font-size:16px;" title="Bỏ qua">&times;</button>
+    </div>
+
     <!-- Modal: Chi Tiết Phân Rã BOM Sản Xuất -->
     <div id="bomDetailModal" class="modal">
         <div class="modal-content" style="max-width:720px;">
@@ -591,7 +615,7 @@
                 <!-- Dynamic Content Loaded via JS -->
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-outline" onclick="closeBOMDetailModal()">Đóng</button>
+                <button type="button" class="btn btn-outline-dark" onclick="closeBOMDetailModal()">Đóng</button>
             </div>
         </div>
     </div>
@@ -609,7 +633,7 @@
                     <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-bottom:12px;">
                         <div>
                             <label style="font-size:12px; font-weight:700; color:#334155; margin-bottom:4px; display:block;">Kho Lưu Trữ <span style="color:#EF4444;">*</span></label>
-                            <select id="prod-warehouse" class="input-field" required onchange="toggleFormWarehouseType()">
+                            <select id="prod-warehouse" class="input-field" required>
                                 <option value="MANUFACTURING">🏭 Kho Sản Xuất (Gia Công &amp; Vật Tư Thô)</option>
                                 <option value="COMMERCIAL">🛒 Kho Thương Mại &amp; Dự Án PCCC</option>
                             </select>
@@ -670,11 +694,89 @@
                         <textarea id="prod-spec" class="input-field" rows="2" placeholder="Tiêu chuẩn kỹ thuật, vật liệu hợp kim, ghi chú gia công..."></textarea>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-outline" onclick="closeProductModal()">Hủy</button>
-                    <button type="submit" class="btn btn-primary" style="background:var(--vertex-orange);"><i class="fa-solid fa-floppy-disk"></i> Lưu Sản Phẩm</button>
+                <div class="modal-footer" style="display:flex; justify-content:space-between; align-items:center;">
+                    <button type="button" class="btn btn-outline-dark" onclick="resetProductForm()" style="color:#EF4444; border-color:#FECACA;" title="Xóa trắng để nhập lại từ đầu">
+                        <i class="fa-solid fa-rotate-left"></i> Làm Mới
+                    </button>
+                    <div style="display:flex; gap:8px;">
+                        <button type="button" class="btn btn-outline-dark" onclick="closeProductModal()">Thu Nhỏ Form</button>
+                        <button type="submit" class="btn btn-primary" style="background:var(--vertex-orange);"><i class="fa-solid fa-floppy-disk"></i> Lưu Sản Phẩm</button>
+                    </div>
                 </div>
             </form>
+        </div>
+    </div>
+
+    <!-- Modal: Mô Phỏng Định Mức BOM Trực Quan (Interactive BOM Simulator) -->
+    <div id="bomSimulatorModal" class="modal">
+        <div class="modal-content" style="max-width:800px;">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calculator" style="color:var(--vertex-orange);"></i> MÁY TÍNH MÔ PHỎNG ĐỊNH MỨC BOM &amp; GIÁ VỐN NHÀ MÁY</h3>
+                <button type="button" class="btn-close" onclick="closeBOMSimulatorModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p style="font-size:12.5px; color:#64748B; margin-top:0;">
+                    Mô phỏng định mức bóc tách nguyên vật liệu thô (tôn cuộn, nhôm AL5052, phụ kiện bulong inox, sơn tĩnh điện) để tính giá vốn xuất xưởng thực tế và tỷ lệ chiết khấu thương mại.
+                </p>
+
+                <!-- Dynamic Materials Table -->
+                <div class="bom-breakdown-card">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+                        <b style="font-size:13px; color:#0F172A;">Danh Sách Nguyên Vật Liệu Thô (Raw Materials)</b>
+                        <button type="button" class="btn-action-sm" onclick="addSimulatorMaterialRow()" style="color:var(--vertex-orange); font-weight:700;">
+                            <i class="fa-solid fa-plus"></i> Thêm Vật Tư
+                        </button>
+                    </div>
+                    <table style="width:100%; border-collapse:collapse; font-size:12.5px;" id="sim-mat-table">
+                        <thead>
+                            <tr style="background:#E2E8F0; text-align:left; color:#475569;">
+                                <th style="padding:6px 8px;">Tên Vật Tư Thô</th>
+                                <th style="width:80px; text-align:center;">ĐVT</th>
+                                <th style="width:90px; text-align:center;">Định Mức</th>
+                                <th style="width:130px; text-align:right;">Đơn Giá (VNĐ)</th>
+                                <th style="width:130px; text-align:right;">Thành Tiền</th>
+                                <th style="width:40px; text-align:center;">Xóa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="sim-mat-tbody">
+                            <!-- Populated via JavaScript -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Parameters Grid -->
+                <div style="display:grid; grid-template-columns: 1fr 1fr 1fr; gap:12px; margin-bottom:14px;">
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155;">% Hao Hụt Phế Liệu (Scrap %)</label>
+                        <div style="display:flex; align-items:center; gap:6px;">
+                            <input type="number" id="sim-scrap-rate" class="input-field" value="5" min="0" max="30" step="1" oninput="recalcSimulator()">
+                            <span style="font-weight:700; color:#475569;">%</span>
+                        </div>
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155;">Chi Phí Nhân Công (VNĐ)</label>
+                        <input type="number" id="sim-labor-cost" class="input-field" value="750000" oninput="recalcSimulator()">
+                    </div>
+                    <div>
+                        <label style="font-size:12px; font-weight:700; color:#334155;">Chi Phí Quản Lý Xưởng (VNĐ)</label>
+                        <input type="number" id="sim-overhead-cost" class="input-field" value="475000" oninput="recalcSimulator()">
+                    </div>
+                </div>
+
+                <!-- Live Results Box -->
+                <div class="bom-cost-formula-box" id="sim-result-box">
+                    <div><b>KẾT QUẢ TÍNH TOÁN GIÁ VỐN &amp; TẦNG GIÁ THƯƠNG MẠI:</b></div>
+                    <div style="font-size:20px; font-weight:800; color:#34D399; margin:4px 0;" id="sim-total-cost-display">4,432,750 VNĐ</div>
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:8px; margin-top:8px; font-size:12px; color:#CBD5E1;">
+                        <div>🟢 Giá Lẻ Đề Xuất (+30% Margin): <b style="color:#FFFFFF;" id="sim-retail-display">6,333,000 đ</b></div>
+                        <div>🔵 Giá Đại Lý Đề Xuất (+15% Margin): <b style="color:#FFFFFF;" id="sim-dealer-display">5,215,000 đ</b></div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-outline-dark" onclick="closeBOMSimulatorModal()">Đóng</button>
+                <button type="button" class="btn btn-primary" onclick="applySimulatorToProduct()" style="background:var(--vertex-orange);"><i class="fa-solid fa-arrow-right-to-bracket"></i> Đưa Vào Form Sản Phẩm</button>
+            </div>
         </div>
     </div>
 
@@ -683,6 +785,7 @@
 
     <script>
         let currentWhTab = 'MANUFACTURING';
+        let isFormDrafted = false;
 
         function showToast(msg, type = 'info') {
             const toast = document.getElementById('toast');
@@ -823,18 +926,21 @@
 
         function openAddProductModal() {
             document.getElementById('product-modal-title').innerHTML = `<i class="fa-solid fa-plus" style="color:var(--vertex-orange);"></i> THÊM MỚI SẢN PHẨM &amp; CẤU HÌNH GIÁ 4 TẦNG`;
-            document.getElementById('prod-id').value = '';
-            document.getElementById('prod-warehouse').value = currentWhTab;
-            document.getElementById('prod-sku').value = '';
-            document.getElementById('prod-name').value = '';
-            document.getElementById('prod-category').value = '';
-            document.getElementById('prod-unit').value = 'cái';
-            document.getElementById('prod-stock').value = '100';
-            document.getElementById('prod-cost').value = '';
-            document.getElementById('prod-retail').value = '';
-            document.getElementById('prod-dealer').value = '';
-            document.getElementById('prod-project-disc').value = '8.0';
-            document.getElementById('prod-spec').value = '';
+            if (!isFormDrafted) {
+                document.getElementById('prod-id').value = '';
+                document.getElementById('prod-warehouse').value = currentWhTab;
+                document.getElementById('prod-sku').value = '';
+                document.getElementById('prod-name').value = '';
+                document.getElementById('prod-category').value = '';
+                document.getElementById('prod-unit').value = 'cái';
+                document.getElementById('prod-stock').value = '100';
+                document.getElementById('prod-cost').value = '';
+                document.getElementById('prod-retail').value = '';
+                document.getElementById('prod-dealer').value = '';
+                document.getElementById('prod-project-disc').value = '8.0';
+                document.getElementById('prod-spec').value = '';
+            }
+            document.getElementById('modalRecoveryDock').style.display = 'none';
             document.getElementById('productEditModal').style.display = 'block';
         }
 
@@ -859,6 +965,7 @@
                 document.getElementById('prod-project-disc').value = item.project_discount_rate;
                 document.getElementById('prod-spec').value = item.spec;
 
+                document.getElementById('modalRecoveryDock').style.display = 'none';
                 document.getElementById('productEditModal').style.display = 'block';
             } catch (err) {
                 showToast(err.message, 'error');
@@ -867,6 +974,39 @@
 
         function closeProductModal() {
             document.getElementById('productEditModal').style.display = 'none';
+            const nameVal = document.getElementById('prod-name').value.trim();
+            const skuVal = document.getElementById('prod-sku').value.trim();
+            if (nameVal || skuVal) {
+                isFormDrafted = true;
+                document.getElementById('dock-status-text').textContent = `Form đang mở dở [${skuVal || nameVal}]. Dữ liệu được bảo toàn.`;
+                document.getElementById('modalRecoveryDock').style.display = 'flex';
+            }
+        }
+
+        function resumeDraftProductModal() {
+            document.getElementById('modalRecoveryDock').style.display = 'none';
+            document.getElementById('productEditModal').style.display = 'block';
+        }
+
+        function resetProductForm() {
+            document.getElementById('prod-id').value = '';
+            document.getElementById('prod-sku').value = '';
+            document.getElementById('prod-name').value = '';
+            document.getElementById('prod-category').value = '';
+            document.getElementById('prod-unit').value = 'cái';
+            document.getElementById('prod-stock').value = '100';
+            document.getElementById('prod-cost').value = '';
+            document.getElementById('prod-retail').value = '';
+            document.getElementById('prod-dealer').value = '';
+            document.getElementById('prod-project-disc').value = '8.0';
+            document.getElementById('prod-spec').value = '';
+            isFormDrafted = false;
+            document.getElementById('modalRecoveryDock').style.display = 'none';
+            showToast('Đã xóa trắng dữ liệu form', 'info');
+        }
+
+        function dismissRecoveryDock() {
+            document.getElementById('modalRecoveryDock').style.display = 'none';
         }
 
         function autoCalculateSuggestedTiers() {
@@ -913,6 +1053,7 @@
                 const data = await resp.json();
                 if (!resp.ok) throw new Error(data.detail || 'Lưu sản phẩm thất bại');
 
+                isFormDrafted = false;
                 showToast(data.message || 'Lưu sản phẩm thành công!', 'success');
                 closeProductModal();
                 setTimeout(() => { window.location.reload(); }, 800);
@@ -920,6 +1061,108 @@
             } catch (err) {
                 showToast(err.message, 'error');
             }
+        }
+
+        // ==========================================
+        // BOM Simulator Logic
+        // ==========================================
+        const defaultSimulatorMaterials = [
+            { name: "Tấm nhôm AL5052 (3.0mm)", unit: "kg", qty: 25.0, price: 115000 },
+            { name: "Bulong Inox 304 M8x35", unit: "bộ", qty: 1.0, price: 180000 }
+        ];
+
+        function openBOMSimulatorModal() {
+            renderSimulatorRows();
+            recalcSimulator();
+            document.getElementById('bomSimulatorModal').style.display = 'block';
+        }
+
+        function closeBOMSimulatorModal() {
+            document.getElementById('bomSimulatorModal').style.display = 'none';
+        }
+
+        function renderSimulatorRows() {
+            const tbody = document.getElementById('sim-mat-tbody');
+            tbody.innerHTML = '';
+            defaultSimulatorMaterials.forEach((m, idx) => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td style="padding:6px 8px;">
+                        <input type="text" class="input-field" style="padding:4px 8px; font-size:12px;" value="${m.name}" oninput="defaultSimulatorMaterials[${idx}].name=this.value">
+                    </td>
+                    <td style="text-align:center;">
+                        <input type="text" class="input-field" style="padding:4px 4px; font-size:12px; text-align:center; width:50px;" value="${m.unit}" oninput="defaultSimulatorMaterials[${idx}].unit=this.value">
+                    </td>
+                    <td style="text-align:center;">
+                        <input type="number" class="input-field" style="padding:4px 4px; font-size:12px; text-align:center; width:65px;" value="${m.qty}" step="any" oninput="defaultSimulatorMaterials[${idx}].qty=parseFloat(this.value)||0; recalcSimulator();">
+                    </td>
+                    <td style="text-align:right;">
+                        <input type="number" class="input-field" style="padding:4px 6px; font-size:12px; text-align:right; width:105px;" value="${m.price}" oninput="defaultSimulatorMaterials[${idx}].price=parseFloat(this.value)||0; recalcSimulator();">
+                    </td>
+                    <td style="text-align:right; font-weight:700; color:#0F172A;" class="sim-row-total">
+                        ${((m.qty || 0) * (m.price || 0)).toLocaleString()} đ
+                    </td>
+                    <td style="text-align:center;">
+                        <button type="button" onclick="removeSimulatorRow(${idx})" style="background:transparent; border:none; color:#EF4444; cursor:pointer;"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function addSimulatorMaterialRow() {
+            defaultSimulatorMaterials.push({ name: "Vật tư phụ / Sơn tĩnh điện", unit: "gói", qty: 1.0, price: 150000 });
+            renderSimulatorRows();
+            recalcSimulator();
+        }
+
+        function removeSimulatorRow(idx) {
+            defaultSimulatorMaterials.splice(idx, 1);
+            renderSimulatorRows();
+            recalcSimulator();
+        }
+
+        let lastSimResult = { cost: 0, retail: 0, dealer: 0 };
+
+        function recalcSimulator() {
+            let matTotal = 0;
+            defaultSimulatorMaterials.forEach(m => {
+                matTotal += ((m.qty || 0) * (m.price || 0));
+            });
+
+            // Update row totals
+            document.querySelectorAll('#sim-mat-tbody tr').forEach((tr, i) => {
+                const m = defaultSimulatorMaterials[i];
+                if (m) {
+                    const totCell = tr.querySelector('.sim-row-total');
+                    if (totCell) totCell.textContent = `${Math.round((m.qty || 0) * (m.price || 0)).toLocaleString()} đ`;
+                }
+            });
+
+            const scrapRate = (parseFloat(document.getElementById('sim-scrap-rate').value) || 5) / 100;
+            const labor = parseFloat(document.getElementById('sim-labor-cost').value) || 0;
+            const overhead = parseFloat(document.getElementById('sim-overhead-cost').value) || 0;
+
+            const scrapCost = matTotal * scrapRate;
+            const realCost = Math.round(matTotal + scrapCost + labor + overhead);
+
+            const suggestedRetail = Math.round((realCost / (1.0 - 0.30)) / 1000) * 1000;
+            const suggestedDealer = Math.round((realCost / (1.0 - 0.15)) / 1000) * 1000;
+
+            lastSimResult = { cost: realCost, retail: suggestedRetail, dealer: suggestedDealer };
+
+            document.getElementById('sim-total-cost-display').textContent = `${realCost.toLocaleString()} VNĐ`;
+            document.getElementById('sim-retail-display').textContent = `${suggestedRetail.toLocaleString()} đ`;
+            document.getElementById('sim-dealer-display').textContent = `${suggestedDealer.toLocaleString()} đ`;
+        }
+
+        function applySimulatorToProduct() {
+            closeBOMSimulatorModal();
+            openAddProductModal();
+            document.getElementById('prod-cost').value = lastSimResult.cost;
+            document.getElementById('prod-retail').value = lastSimResult.retail;
+            document.getElementById('prod-dealer').value = lastSimResult.dealer;
+            showToast('Đã áp dụng kết quả BOM vào form sản phẩm!', 'success');
         }
     </script>
 </body>
