@@ -246,9 +246,16 @@ function initForm() {
                 body: formData
             });
 
-            const data = await response.json();
+            let data = {};
+            try {
+                const rawText = await response.text();
+                data = rawText ? JSON.parse(rawText) : {};
+            } catch (jsonErr) {
+                data = { detail: `Lỗi kết nối phản hồi máy chủ (HTTP ${response.status}: ${response.statusText})` };
+            }
+
             if (!response.ok) {
-                throw new Error(data.detail || 'Lỗi xử lý tạo báo giá');
+                throw new Error(data.detail || data.message || `Lỗi máy chủ (${response.status})`);
             }
 
             const quote = data.quote;
@@ -963,8 +970,14 @@ async function handleUploadNewTemplate(e) {
             method: 'POST',
             body: formData
         });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.detail || 'Lỗi tải lên mẫu');
+        let data = {};
+        try {
+            const rawText = await resp.text();
+            data = rawText ? JSON.parse(rawText) : {};
+        } catch (e) {
+            data = { detail: `Lỗi kết nối máy chủ (${resp.status})` };
+        }
+        if (!resp.ok) throw new Error(data.detail || data.message || `Lỗi tải lên mẫu (${resp.status})`);
 
         showToast(`Đã lưu file mẫu chuẩn '${data.name}' thành công!`);
         window.location.reload();
@@ -1017,8 +1030,14 @@ async function handleDirectTemplateUpload(file) {
             method: 'POST',
             body: formData
         });
-        const data = await resp.json();
-        if (!resp.ok) throw new Error(data.detail || 'Lỗi khi tải file mẫu');
+        let data = {};
+        try {
+            const rawText = await resp.text();
+            data = rawText ? JSON.parse(rawText) : {};
+        } catch (e) {
+            data = { detail: `Lỗi phản hồi máy chủ (${resp.status})` };
+        }
+        if (!resp.ok) throw new Error(data.detail || data.message || `Lỗi khi tải file mẫu (${resp.status})`);
 
         // Update select dropdown immediately
         const tplSelect = document.getElementById('template_id');

@@ -109,24 +109,40 @@ app.include_router(field_reports_router)
 app.include_router(inventory_router)
 app.include_router(quote_builder_router)
 
+from fastapi.exceptions import RequestValidationError
+
 # Ensure all API 404 / 500 / Validation errors return valid JSON (avoids client syntax errors)
+@app.exception_handler(RequestValidationError)
+async def custom_validation_exception_handler(request: Request, exc: RequestValidationError):
+    errors = exc.errors()
+    first_err = errors[0] if errors else {}
+    msg = first_err.get("msg", "Dữ liệu yêu cầu không hợp lệ")
+    loc = " -> ".join(str(l) for l in first_err.get("loc", [])) if first_err else ""
+    detail = f"{msg} ({loc})" if loc else msg
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={"status": "error", "detail": f"Lỗi xác thực dữ liệu: {detail}", "errors": errors}
+    )
+
 @app.exception_handler(StarletteHTTPException)
 async def custom_http_exception_handler(request: Request, exc: StarletteHTTPException):
     return JSONResponse(
         status_code=exc.status_code,
-        content={"detail": exc.detail or "Not Found"}
+        content={"status": "error", "detail": exc.detail or "Not Found"}
     )
 
 @app.exception_handler(Exception)
 async def custom_general_exception_handler(request: Request, exc: Exception):
+    import traceback
+    print(f"[UNHANDLED EXCEPTION] {traceback.format_exc()}")
     if request.url.path.startswith("/api/"):
         return JSONResponse(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": f"Lỗi hệ thống: {str(exc)}"}
+            content={"status": "error", "detail": f"Lỗi hệ thống: {str(exc)}"}
         )
     return JSONResponse(
         status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-        content={"detail": "Internal Server Error"}
+        content={"status": "error", "detail": "Internal Server Error"}
     )
 
 @app.get("/api/health")

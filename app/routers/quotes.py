@@ -63,41 +63,51 @@ async def upload_boq_and_generate_quote(
     """
     from app.services.file_validator import FileValidator
     from app.services.sanitizer import clean_string
+    import traceback
 
-    # 1. Validate file extension, signature (Magic Bytes), and stream safely
-    save_path, clean_filename = await FileValidator.validate_and_save(
-        upload_file=file,
-        destination_dir=settings.UPLOAD_DIR
-    )
+    try:
+        # 1. Validate file extension, signature (Magic Bytes), and stream safely
+        save_path, clean_filename = await FileValidator.validate_and_save(
+            upload_file=file,
+            destination_dir=settings.UPLOAD_DIR
+        )
 
-    # 2. Sanitize user inputs against XSS and control chars
-    clean_cust_name = clean_string(customer_name, escape_html_entities=False) or "Quý Khách Hàng"
-    clean_cust_phone = clean_string(customer_phone, escape_html_entities=False)
-    clean_cust_email = clean_string(customer_email, escape_html_entities=False)
-    clean_cust_zalo = clean_string(customer_zalo_id, escape_html_entities=False)
-    clean_proj_name = clean_string(project_name, escape_html_entities=False) or "Công trình Tiêu chuẩn"
-    clean_proj_addr = clean_string(project_address, escape_html_entities=False)
+        # 2. Sanitize user inputs against XSS and control chars
+        clean_cust_name = clean_string(customer_name, escape_html_entities=False) or "Quý Khách Hàng"
+        clean_cust_phone = clean_string(customer_phone, escape_html_entities=False)
+        clean_cust_email = clean_string(customer_email, escape_html_entities=False)
+        clean_cust_zalo = clean_string(customer_zalo_id, escape_html_entities=False)
+        clean_proj_name = clean_string(project_name, escape_html_entities=False) or "Công trình Tiêu chuẩn"
+        clean_proj_addr = clean_string(project_address, escape_html_entities=False)
 
-    # 3. Run AI Agent Workflow (Asynchronous & Non-blocking)
-    quote = await VertexQuoteAgent.process_quote_request(
-        file_path=save_path,
-        customer_name=clean_cust_name,
-        customer_phone=clean_cust_phone,
-        customer_email=clean_cust_email,
-        customer_zalo_id=clean_cust_zalo,
-        project_name=clean_proj_name,
-        project_address=clean_proj_addr,
-        discount_rate=discount_rate,
-        vat_rate=vat_rate,
-        language=language,
-        template_id=template_id
-    )
+        # 3. Run AI Agent Workflow (Asynchronous & Non-blocking)
+        quote = await VertexQuoteAgent.process_quote_request(
+            file_path=save_path,
+            customer_name=clean_cust_name,
+            customer_phone=clean_cust_phone,
+            customer_email=clean_cust_email,
+            customer_zalo_id=clean_cust_zalo,
+            project_name=clean_proj_name,
+            project_address=clean_proj_addr,
+            discount_rate=discount_rate,
+            vat_rate=vat_rate,
+            language=language,
+            template_id=template_id
+        )
 
-    return {
-        "status": "success",
-        "message": f"Báo giá {quote.quote_code} đã được tạo thành công và gửi duyệt tới Quản lý qua Zalo OA!",
-        "quote": quote
-    }
+        return {
+            "status": "success",
+            "message": f"Báo giá {quote.quote_code} đã được tạo thành công và gửi duyệt tới Quản lý qua Zalo OA!",
+            "quote": quote
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"[CRITICAL UPLOAD ERROR] {traceback.format_exc()}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Lỗi khi xử lý file và tính toán báo giá: {str(e)}"
+        )
 
 
 @router.get("", response_model=List[Quote])
