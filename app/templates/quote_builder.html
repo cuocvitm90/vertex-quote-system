@@ -197,56 +197,57 @@
         }
     </style>
 </head>
+<body>
     <!-- Top Header Navigation (High-Contrast & Tactile UI) -->
     <header class="app-header">
         <div class="header-container">
-            <div class="logo-group">
-                <a href="/" style="display: flex; align-items: center; gap: 12px; text-decoration: none;">
-                    <img src="/static/images/logo.png" alt="Vertex PCCC Logo" class="brand-logo-img" onerror="this.src='/static/images/logo-white.svg'">
-                    <div>
-                        <span style="font-size:15px; font-weight:800; color:#FFFFFF; letter-spacing:0.5px; display:block; line-height:1.1;">VERTEX</span>
-                        <span style="font-size:9.5px; font-weight:700; color:var(--vertex-orange-main); letter-spacing:0.3px;">PCCC &amp; MANUFACTURING</span>
-                    </div>
+            <!-- Left: Brand Logo -->
+            <div class="header-left">
+                <a href="/" class="brand-block" title="Vertex Construction & PCCC Automation Engine">
+                    <img src="/static/images/logo-white.svg" alt="VERTEX" class="brand-logo-img" onerror="this.src='/static/images/logo.png'">
                 </a>
             </div>
 
-            <div class="header-actions">
-                <a href="/" class="btn" title="Tổng quan các gói báo giá">
+            <!-- Center: Standardized SaaS Navigation Toolbar -->
+            <nav class="header-nav-toolbar">
+                <a href="/" class="nav-pill-btn" title="Tổng quan các gói báo giá">
                     <i class="fa-solid fa-table-list" style="color:#60A5FA;"></i> <span>Tổng Báo Giá</span>
                 </a>
 
-                <a href="/inventory" class="btn" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
+                <a href="/inventory" class="nav-pill-btn" title="Quản lý Kho sản xuất, Kho thương mại và BOM định mức">
                     <i class="fa-solid fa-boxes-stacked" style="color:#F59E0B;"></i> <span>Kho &amp; BOM</span>
                 </a>
 
-                <a href="/quote-builder" class="btn active" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
+                <a href="/quote-builder" class="nav-pill-btn active" title="Lập báo giá nhanh và tự động tính 4 tầng giá">
                     <i class="fa-solid fa-file-signature" style="color:#FFFFFF;"></i> <span>Lập Báo Giá</span>
                 </a>
 
-                <a href="/cad-takeoff" class="btn" title="Bóc tách bản vẽ CAD/BIM">
+                <a href="/cad-takeoff" class="nav-pill-btn" title="Bóc tách bản vẽ CAD/BIM">
                     <i class="fa-solid fa-layer-group" style="color:#A78BFA;"></i> <span>Bóc Tách CAD</span>
                 </a>
 
-                <a href="/field-reports" class="btn" title="Chấm công GPS & Hiện trường">
+                <a href="/field-reports" class="nav-pill-btn" title="Chấm công GPS & Hiện trường">
                     <i class="fa-solid fa-location-dot" style="color:#34D399;"></i> <span>Hiện Trường</span>
                 </a>
 
-                <a href="/docs" target="_blank" class="btn" title="Tài liệu API Swagger">
+                <a href="/docs" target="_blank" class="nav-pill-btn" title="Tài liệu API Swagger">
                     <i class="fa-solid fa-code" style="color:#94A3B8;"></i> <span>API Docs</span>
                 </a>
+            </nav>
 
-                <!-- User Profile & RBAC Role Chip -->
-                <div class="user-profile-chip">
+            <!-- Right: Protected User Profile Badge & Logout (Safe Pinned Layout) -->
+            <div class="header-right-user">
+                <div class="user-profile-badge" title="Tài khoản đang đăng nhập">
                     <div class="user-avatar">
                         {{ user.full_name[0] if user and user.full_name else 'V' }}
                     </div>
                     <div class="user-meta">
-                        <span class="user-name">{{ user.full_name if user else 'Người dùng' }}</span>
+                        <span class="user-name" title="{{ user.full_name if user else 'Người dùng' }}">{{ user.full_name if user else 'Người dùng' }}</span>
                         <span class="user-role-tag">
                             <i class="fa-solid fa-shield-halved"></i> {{ user.role.value if user else 'STAFF' }}
                         </span>
                     </div>
-                    <a href="/logout" class="btn-logout" title="Đăng xuất">
+                    <a href="/logout" class="btn-logout" title="Đăng xuất tài khoản">
                         <i class="fa-solid fa-arrow-right-from-bracket"></i>
                     </a>
                 </div>

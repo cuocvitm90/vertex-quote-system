@@ -77,17 +77,22 @@ html, body {
    -------------------------------------------------- */
 .app-header {
     width: 100%;
+/* --------------------------------------------------
+   Top Header Navigation (Full SaaS Toolbar & Safe Profile Alignment)
+   -------------------------------------------------- */
+.app-header,
+.header {
+    width: 100%;
     max-width: 100vw;
-    background: var(--vertex-navy-main);
+    background: #0F172A;
     border-bottom: 3px solid var(--vertex-orange-main);
     color: #FFFFFF;
-    padding: 8px 0;
+    padding: 6px 0;
     position: sticky;
     top: 0;
-    z-index: 100;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+    z-index: 1000;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
     box-sizing: border-box;
-    overflow-x: hidden;
 }
 
 .header-container {
@@ -102,75 +107,48 @@ html, body {
     box-sizing: border-box;
 }
 
+.header-left,
 .brand-block {
     display: flex;
     align-items: center;
+    gap: 10px;
     text-decoration: none;
     flex-shrink: 0;
 }
 
 .brand-logo-img {
-    height: 40px;
+    height: 38px;
     width: auto;
     object-fit: contain;
     display: block;
 }
 
-.header-stats {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-shrink: 0;
-}
-
-.stat-badge {
-    height: 34px;
-    background: rgba(255, 255, 255, 0.06);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    padding: 0 8px;
-    border-radius: var(--radius-sm);
-    display: inline-flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    box-sizing: border-box;
-    white-space: nowrap;
-}
-
-.stat-badge .stat-label {
-    font-size: 10.5px;
-    color: #94A3B8;
-    text-transform: uppercase;
-    font-weight: 600;
-    letter-spacing: 0.2px;
-    line-height: 1;
-}
-
-.stat-badge .stat-value {
-    font-size: 13px;
-    font-weight: 800;
-    color: #FFFFFF;
-    line-height: 1;
-}
-
-.stat-badge.badge-warning .stat-value { color: #FBBF24; }
-.stat-badge.badge-success .stat-value { color: #34D399; }
-
+/* Central SaaS Toolbar (Scrollable if needed, zero clipping) */
+.header-nav-toolbar,
 .header-actions {
     display: flex;
     align-items: center;
-    gap: 8px;
-    flex-shrink: 1;
+    gap: 6px;
+    flex: 1;
     min-width: 0;
-    flex-wrap: nowrap;
+    overflow-x: auto;
+    padding: 2px 4px;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
 
-/* Modern Pill-Shaped Navigation Buttons (Stripe / Vercel SaaS Style) */
+.header-nav-toolbar::-webkit-scrollbar,
+.header-actions::-webkit-scrollbar {
+    display: none;
+}
+
+/* Standardized Pill Navigation Buttons across the entire Toolbar */
+.nav-pill-btn,
 .header-actions .btn,
 .nav-btn {
-    height: 36px;
-    padding: 0 14px;
-    font-size: 12.5px;
+    height: 34px;
+    padding: 0 12px;
+    font-size: 12px;
     font-weight: 700;
     font-family: inherit;
     letter-spacing: 0.1px;
@@ -178,7 +156,7 @@ html, body {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 7px;
+    gap: 6px;
     white-space: nowrap;
     box-sizing: border-box;
     line-height: 1;
@@ -186,36 +164,40 @@ html, body {
     flex-shrink: 0;
     text-decoration: none;
     cursor: pointer;
-    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     user-select: none;
     background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
     color: #F8FAFC !important;
     border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.18), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+.nav-pill-btn i,
 .header-actions .btn i,
 .nav-btn i {
-    font-size: 13px;
+    font-size: 12.5px;
     transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
+.nav-pill-btn:hover,
 .header-actions .btn:hover,
 .nav-btn:hover {
-    background: rgba(255, 255, 255, 0.16) !important;
+    background: rgba(255, 255, 255, 0.18) !important;
     border-color: rgba(255, 102, 0, 0.65) !important;
     color: #FFFFFF !important;
-    transform: translateY(-2px);
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28), 0 0 0 1px rgba(255, 102, 0, 0.35);
+    transform: translateY(-1.5px);
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(255, 102, 0, 0.35);
 }
 
+.nav-pill-btn:hover i,
 .header-actions .btn:hover i,
 .nav-btn:hover i {
-    transform: scale(1.18);
+    transform: scale(1.15);
 }
 
+.nav-pill-btn:active,
 .header-actions .btn:active,
 .nav-btn:active {
     transform: translateY(0) scale(0.96);
@@ -223,6 +205,7 @@ html, body {
 }
 
 /* Active State: Signature Vibrant Glowing Vertex Orange Gradient */
+.nav-pill-btn.active,
 .header-actions .btn.active,
 .header-actions .btn.btn-primary,
 .nav-btn.active {
@@ -230,19 +213,47 @@ html, body {
     border-color: #FFA07A !important;
     color: #FFFFFF !important;
     font-weight: 800;
-    box-shadow: 0 4px 18px rgba(255, 102, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
+    box-shadow: 0 4px 16px rgba(255, 102, 0, 0.5), inset 0 1px 1px rgba(255, 255, 255, 0.4) !important;
 }
 
+.nav-pill-btn.active i,
+.header-actions .btn.active i,
+.nav-btn.active i {
+    color: #FFFFFF !important;
+}
+
+.nav-pill-btn.active:hover,
 .header-actions .btn.active:hover,
-.header-actions .btn.btn-primary:hover,
 .nav-btn.active:hover {
     background: linear-gradient(135deg, #FF771A 0%, #FF994D 100%) !important;
-    transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255, 102, 0, 0.65), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+    transform: translateY(-1.5px);
+    box-shadow: 0 6px 20px rgba(255, 102, 0, 0.6), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important;
+}
+
+/* Toolbar Pill Badges (for counter numbers like 0, 1, etc.) */
+.pill-badge {
+    background: rgba(255, 255, 255, 0.2);
+    color: #FFFFFF;
+    padding: 2px 6px;
+    border-radius: 999px;
+    font-size: 10.5px;
+    font-weight: 800;
+    line-height: 1;
+    margin-left: 2px;
+}
+
+.pill-badge.badge-warning {
+    background: rgba(251, 191, 36, 0.25);
+    color: #FBBF24;
+}
+
+.pill-badge.badge-success {
+    background: rgba(52, 211, 153, 0.25);
+    color: #34D399;
 }
 
 /* --------------------------------------------------
-   Language Selector (Clean, Flat & Modern Native Select)
+   Language Selector Pill (Unified SaaS Design)
    -------------------------------------------------- */
 .lang-selector-wrapper {
     position: relative;
@@ -256,12 +267,12 @@ html, body {
 .lang-select {
     height: 34px;
     background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     color: #FFFFFF !important;
-    padding: 0 24px 0 8px;
-    border-radius: var(--radius-sm);
+    padding: 0 22px 0 10px;
+    border-radius: 999px;
     font-size: 11.5px;
-    font-weight: 600;
+    font-weight: 700;
     font-family: inherit;
     cursor: pointer;
     outline: none;
@@ -281,61 +292,74 @@ html, body {
 
 .lang-select:hover,
 .lang-select:focus {
-    background-color: rgba(255, 255, 255, 0.16);
-    border-color: rgba(255, 255, 255, 0.4);
-    box-shadow: 0 0 0 2px rgba(255, 107, 53, 0.3);
+    background-color: rgba(255, 255, 255, 0.18);
+    border-color: rgba(255, 102, 0, 0.65);
+    box-shadow: 0 0 0 2px rgba(255, 102, 0, 0.25);
 }
 
 .lang-select option {
-    background: #1B2234 !important;
+    background: #0F172A !important;
     color: #FFFFFF !important;
     font-size: 13px;
     padding: 8px 12px;
 }
 
-/* User Profile Chip & Integrated Logout Button */
+/* --------------------------------------------------
+   Right User Profile & Logout Dock (Zero Clipping, Always Safe)
+   -------------------------------------------------- */
+.header-right-user {
+    display: flex;
+    align-items: center;
+    flex-shrink: 0;
+    margin-left: auto;
+    padding-left: 4px;
+    z-index: 2;
+}
+
+.user-profile-badge,
 .user-profile-chip {
     height: 34px;
     display: inline-flex;
     align-items: center;
-    gap: 6px;
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 0 6px 0 4px;
+    gap: 7px;
+    background: rgba(255, 255, 255, 0.09);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 0 8px 0 5px;
     border-radius: 999px;
     box-sizing: border-box;
     white-space: nowrap;
     flex-shrink: 0;
-    max-width: 175px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
     transition: all 0.2s ease;
 }
 
+.user-profile-badge:hover,
 .user-profile-chip:hover {
-    background: rgba(255, 255, 255, 0.12);
-    border-color: rgba(255, 107, 53, 0.35);
+    background: rgba(255, 255, 255, 0.16);
+    border-color: rgba(255, 102, 0, 0.45);
 }
 
 .user-avatar {
     width: 24px;
     height: 24px;
     border-radius: 50%;
-    background: linear-gradient(135deg, var(--vertex-orange-main), var(--vertex-orange-dark));
+    background: linear-gradient(135deg, #FF6600, #FF8533);
     display: flex;
     align-items: center;
     justify-content: center;
     color: #FFFFFF;
-    font-size: 10.5px;
+    font-size: 11px;
     font-weight: 800;
-    box-shadow: 0 2px 6px rgba(255, 107, 53, 0.4);
+    box-shadow: 0 2px 6px rgba(255, 102, 0, 0.4);
     flex-shrink: 0;
 }
 
 .user-meta {
     display: flex;
     flex-direction: column;
-    line-height: 1.15;
+    line-height: 1.1;
     gap: 1px;
-    max-width: 85px;
+    max-width: 105px;
     overflow: hidden;
 }
 
@@ -350,19 +374,19 @@ html, body {
 }
 
 .user-role-tag {
-    font-size: 8px;
+    font-size: 8.5px;
     font-weight: 800;
     color: var(--vertex-orange-main);
     text-transform: uppercase;
-    letter-spacing: 0.4px;
+    letter-spacing: 0.3px;
 }
 
 .btn-logout {
-    background: rgba(255, 255, 255, 0.08);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    color: #94A3B8;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    color: #CBD5E1;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 10.5px;
     width: 22px;
     height: 22px;
     border-radius: 50%;
@@ -370,16 +394,16 @@ html, body {
     align-items: center;
     justify-content: center;
     margin-left: 2px;
-    transition: all 0.2s ease;
+    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
     text-decoration: none;
     flex-shrink: 0;
 }
 
 .btn-logout:hover {
-    background: rgba(239, 68, 68, 0.25);
-    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.35);
+    border-color: #EF4444;
     color: #EF4444;
-    transform: scale(1.06);
+    transform: scale(1.12);
 }
 
 /* Navbar Responsive Behavior */
